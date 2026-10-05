@@ -1,0 +1,36 @@
+# =============================================================================
+# .gitignore — Common rules.
+# =============================================================================
+
+# --- Environment --- #
+.env
+.env.*
+!.env.example
+
+# --- Editors --- #
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- Operating systems --- #
+.DS_Store
+Thumbs.db
+
+# --- Logs --- #
+*.log
+
+# --- Node (Husky, Commitlint, Commitizen) --- #
+node_modules/
+
+# --- Python --- #
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+dist/
