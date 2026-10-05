@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+#
+# commit-msg — Rejects a commit message that does not follow Conventional Commits.
+#
+# Commitlint is an npm package, so unlike the language toolchain it has no dev
+# container fallback: `npm install` is required, and it is also what wires the
+# hooks up in the first place.
+#
+
+if [ ! -x node_modules/.bin/commitlint ]; then
+	printf "%b\n" "\033[0;31mCommit rejected: commitlint is not installed. Run: npm install\033[0m"
+	exit 1
+fi
+
+npx --no -- commitlint --edit "$1"

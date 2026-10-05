@@ -1,0 +1,65 @@
+#!/usr/bin/env sh
+#
+# pre-commit — Rejects the commit when Ruff reports a formatting or a lint
+# error on a staged file.
+#
+# Husky runs this script with `sh -e`: a command substitution that fails would
+# abort it, hence the `|| true` on the grep.
+#
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+RESET='\033[0m'
+
+reject() {
+	printf "%b\n" "${RED}Commit rejected: $1${RESET}"
+	exit 1
+}
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.pyi?$' || true)
+
+if [ -z "$STAGED" ]; then
+	exit 0
+fi
+
+if [ -x .venv/bin/ruff ]; then
+	RUFF=.venv/bin/ruff
+elif [ -x .venv/Scripts/ruff.exe ]; then
+	RUFF=.venv/Scripts/ruff.exe
+elif command -v ruff > /dev/null 2>&1; then
+	RUFF=ruff
+else
+	reject "ruff is not installed (you can use the command : nix develop .#dev)."
+fi
+
+run_tool() {
+	"$@"
+}
+
+STATUS=0
+
+printf "%b\n" "${YELLOW}› ruff format${RESET}"
+# shellcheck disable=SC2086
+if run_tool "$RUFF" format --check $STAGED; then
+	printf "%b\n" "  ${GREEN}✓${RESET} formatting"
+else
+	printf "%b\n" "  ${RED}✗${RESET} formatting"
+	printf "%b\n" "Run: ${YELLOW}$RUFF format <files>${RESET}"
+	STATUS=1
+fi
+
+printf "%b\n" "${YELLOW}› ruff check${RESET}"
+# shellcheck disable=SC2086
+if run_tool "$RUFF" check $STAGED; then
+	printf "%b\n" "  ${GREEN}✓${RESET} lint"
+else
+	printf "%b\n" "  ${RED}✗${RESET} lint"
+	STATUS=1
+fi
+
+if [ "$STATUS" -ne 0 ]; then
+	reject "quality checks failed."
+fi
+
+exit 0
