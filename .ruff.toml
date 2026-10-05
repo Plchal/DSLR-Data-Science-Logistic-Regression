@@ -1,0 +1,85 @@
+# =============================================================================
+# Ruff — formatter and linter.
+# https://docs.astral.sh/ruff
+# =============================================================================
+
+# Exclude a variety of commonly ignored directories.
+exclude = [
+	".bzr",
+	".direnv",
+	".eggs",
+	".git",
+	".git-rewrite",
+	".hg",
+	".ipynb_checkpoints",
+	".mypy_cache",
+	".nox",
+	".pants.d",
+	".pyenv",
+	".pytest_cache",
+	".pytype",
+	".ruff_cache",
+	".svn",
+	".tox",
+	".venv",
+	".vscode",
+	"__pycache__",
+	"__pypackages__",
+	"_build",
+	"buck-out",
+	"build",
+	"dist",
+	"node_modules",
+	"site-packages",
+	"venv",
+]
+
+target-version = "py311"
+line-length = 120
+indent-width = 4
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+docstring-code-format = true
+
+[lint]
+extend-select = [
+	"A",	# Built-in name shadowing and misuse.
+	"ANN",	# Missing or incorrect type annotations.
+	"ARG",	# Unused function and method arguments.
+	"B",	# Likely bugs and design issues.
+	"C4",	# Unnecessary or inefficient comprehensions.
+	"C901",	# Functions that are too complex.
+	"D",	# Docstring conventions and formatting.
+	"E",	# pycodestyle errors.
+	"F",	# Pyflakes errors such as unused imports and variables.
+	"I",	# Import sorting and organization.
+	"N",	# Naming conventions.
+	"PL",	# Pylint rules for code quality and design.
+	"PTH",	# Prefer pathlib over os.path.
+	"RUF",	# Ruff-specific rules and best practices.
+	"S",	# Security issues detected by Bandit.
+	"SIM",	# Code simplification opportunities.
+	"UP",	# Python syntax and API modernization.
+	"W",	# pycodestyle warnings.
+]
+
+ignore = [
+	"E501",	# Line length is already enforced by the formatter.
+	"D417", # Disable the requirement for documentation for every function parameter.
+]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[lint.pydocstyle]
+convention = "google"
+
+[lint.per-file-ignores]	# Different rules depending on the folder.
+"tests/*" = ["S101"]
