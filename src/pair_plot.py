@@ -42,10 +42,10 @@ def main() -> None:
 
             if j == 0:
                 ax.set_ylabel(
-                    feat_y.replace(" ", "\n"), fontsize=8, color="#333333", rotation=0, labelpad=40, ha="right"
+                    feat_y.replace(" ", "\n"), fontsize=7, color="#333333", rotation=0, labelpad=40, ha="right"
                 )
             if i == n_features - 1:
-                ax.set_xlabel(feat_x.replace(" ", "\n"), fontsize=8, color="#333333", rotation=90)
+                ax.set_xlabel(feat_x.replace(" ", "\n"), fontsize=7, color="#333333", rotation=0)
 
             ax.spines["top"].set_visible(False)
             ax.spines["right"].set_visible(False)
