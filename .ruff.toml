@@ -82,4 +82,4 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 convention = "google"
 
 [lint.per-file-ignores]	# Different rules depending on the folder.
-"tests/*" = ["S101"]
+"tests/*" = ["S101", "PLR2004"]
