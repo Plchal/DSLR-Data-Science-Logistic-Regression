@@ -39,6 +39,22 @@ run_tool() {
 
 STATUS=0
 
+printf "%b\n" "${YELLOW}› Type check${RESET}"
+if run_tool npm run typecheck; then
+	printf "%b\n" "  ${GREEN}✓${RESET} type checking"
+else
+	printf "%b\n" "  ${RED}✗${RESET} type checking"
+	STATUS=1
+fi
+
+printf "%b\n" "${YELLOW}› Unit tests${RESET}"
+if run_tool npm run test; then
+	printf "%b\n" "  ${GREEN}✓${RESET} testing"
+else
+	printf "%b\n" "  ${RED}✗${RESET} testing"
+	STATUS=1
+fi
+
 printf "%b\n" "${YELLOW}› ruff format${RESET}"
 # shellcheck disable=SC2086
 if run_tool "$RUFF" format --check $STAGED; then

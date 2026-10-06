@@ -8,8 +8,16 @@ version = "0.1.0"
 description = ""
 requires-python = ">=3.11"
 dependencies = [
+    "argparse>=1.4.0",
+    "mypy>=2.4.0",
     "pandas>=3.0.6",
     "pytest>=9.1.1",
 ]
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
+
+[tool.mypy]
+python_version = "3.11"
+follow_untyped_imports = true
+strict = true
