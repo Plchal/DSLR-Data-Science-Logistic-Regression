@@ -1,23 +1,19 @@
 """."""
 
+import argparse
 import math
 
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from utils import load_csv
+from variable import COLS_TO_DROP, DATASET, HOUSE_COLORS
 
 
-def main() -> None:
-    """Create histograms for each subject."""
-    df = load_csv("dataset_train.csv")
-
-    house_colors = {"Ravenclaw": "#222F5B", "Slytherin": "#1A472A", "Gryffindor": "#740001", "Hufflepuff": "#D89E15"}
-
-    cols_to_drop = ["Index", "First Name", "Last Name", "Birthday", "Best Hand", "Hogwarts House"]
-    features = [col for col in df.columns if col not in cols_to_drop]
-
+def plot_histogram(df: pd.DataFrame, features: list[str]) -> None:
+    """."""
     ncases = math.ceil(math.sqrt(len(features)))
-    _fig, axes = plt.subplots(nrows=ncases, ncols=ncases, figsize=(16, 16))
+    _fig, axes = plt.subplots(nrows=ncases, ncols=ncases, figsize=(16, 16), squeeze=False)
     _fig.patch.set_facecolor("#F8F9FA")
     axes_liste = axes.flatten()
 
@@ -27,7 +23,7 @@ def main() -> None:
 
         ax.grid(axis="y", linestyle="--", alpha=0.5, color="#CCCCCC", zorder=0)
 
-        for house, color in house_colors.items():
+        for house, color in HOUSE_COLORS.items():
             data = df[df["Hogwarts House"] == house][col].dropna()
 
             ax.hist(data, bins=20, alpha=0.5, color=color, label=house, edgecolor="white", linewidth=0.7, zorder=3)
@@ -46,6 +42,32 @@ def main() -> None:
     plt.subplots_adjust(bottom=0.1, top=0.95, hspace=0.5, wspace=0.3)
     plt.show()
 
+
+def main() -> None:
+    """Create histograms for each subject."""
+    df = load_csv(DATASET)
+    if df is None:
+        return 0
+    parser = argparse.ArgumentParser(description="A program that displays one or more histograms.")
+
+    parser.add_argument("subject", help="The school subject name.")
+    parser.add_argument("-f", "--full", action="store_true", help="View all of school subject histogram.")
+    args = parser.parse_args()
+    if args.full:
+        features = [col for col in df.columns if col not in COLS_TO_DROP]
+        plot_histogram(df, features)
+        return 0
+
+    if args.subject:
+        if args.subject not in df.columns:
+            print(f"Error : The subject '{args.subject}' does not exist in the dataset.")
+            valid_subject = [col for col in df.columns if col not in COLS_TO_DROP]
+            print(f"Subjects existing : {', '.join(valid_subject)}")
+            return 1
+        feature = [f'{args.subject}']
+        plot_histogram(df, feature)
+        return 0
+    parser.print_help()
 
 if __name__ == "__main__":
     main()
