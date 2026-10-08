@@ -7,7 +7,24 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from utils import load_csv
-from variable import COLS_TO_DROP, DATASET, HOUSE_COLORS
+from variable import COLS_TO_DROP, DATASET, HOUSE_COLORS, HOUSES
+
+
+def homogeneity(df: pd.DataFrame) -> str:
+    """."""
+    dict_means = {}
+    dict_stds = {}
+    for house in HOUSES:
+        df_tmp = df[df["Hogwarts House"] == house].drop(columns=COLS_TO_DROP)
+        dict_means[house] = df_tmp.mean(numeric_only=True)
+        dict_stds[house] = df_tmp.std(numeric_only=True)
+    df_means = pd.DataFrame(dict_means).T
+    df_stds = pd.DataFrame(dict_stds).T
+    var_des_moyennes = df_means.var(ddof=0)
+    var_des_ecart_types = df_stds.var(ddof=0)
+
+    score_homogeneite = var_des_moyennes + var_des_ecart_types
+    return score_homogeneite.idxmin()
 
 
 def plot_histogram(df: pd.DataFrame, features: list[str]) -> None:
@@ -47,15 +64,23 @@ def main() -> None:
     """Create histograms for each subject."""
     df = load_csv(DATASET)
     if df is None:
-        return 0
+        return 1
     parser = argparse.ArgumentParser(description="A program that displays one or more histograms.")
 
-    parser.add_argument("subject", help="The school subject name.")
-    parser.add_argument("-f", "--full", action="store_true", help="View all of school subject histogram.")
+    parser.add_argument("-s", "--subject", type=str, help="Show the school subject histogram you choose.")
+    parser.add_argument(
+        "-a", "--auto", action="store_true", help="Show the school subject histogram the most homogenous."
+    )
+    parser.add_argument("-f", "--full", action="store_true", help="Show all of school subject histogram.")
     args = parser.parse_args()
     if args.full:
         features = [col for col in df.columns if col not in COLS_TO_DROP]
         plot_histogram(df, features)
+        return 0
+
+    if args.auto:
+        feature = [f"{homogeneity(df)}"]
+        plot_histogram(df, feature)
         return 0
 
     if args.subject:
@@ -64,10 +89,14 @@ def main() -> None:
             valid_subject = [col for col in df.columns if col not in COLS_TO_DROP]
             print(f"Subjects existing : {', '.join(valid_subject)}")
             return 1
-        feature = [f'{args.subject}']
+        feature = [f"{args.subject}"]
         plot_histogram(df, feature)
         return 0
-    parser.print_help()
+
+    feature = ["Care of Magical Creatures"]
+    plot_histogram(df, feature)
+    return 0
+
 
 if __name__ == "__main__":
     main()

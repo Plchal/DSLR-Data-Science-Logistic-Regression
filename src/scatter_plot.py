@@ -9,6 +9,8 @@ from utils import load_csv
 def main() -> None:
     """."""
     df = load_csv("dataset_train.csv")
+    if df is None:
+        return 0
 
     cols_to_drop = ["Index", "First Name", "Last Name", "Birthday", "Best Hand", "Hogwarts House"]
     features = [col for col in df.columns if col not in cols_to_drop]
