@@ -6,11 +6,11 @@ import matplotlib.pyplot as plt
 from utils import load_csv
 
 
-def main() -> None:
+def main() -> int:
     """."""
     df = load_csv("dataset_train.csv")
     if df is None:
-        return 0
+        return 1
 
     cols_to_drop = ["Index", "First Name", "Last Name", "Birthday", "Best Hand", "Hogwarts House"]
     features = [col for col in df.columns if col not in cols_to_drop]
@@ -60,6 +60,7 @@ def main() -> None:
 
     plt.subplots_adjust(left=0.08, right=0.98, top=0.92, bottom=0.08, wspace=0.05, hspace=0.05)
     plt.show()
+    return 0
 
 
 if __name__ == "__main__":

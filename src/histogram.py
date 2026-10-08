@@ -24,7 +24,7 @@ def homogeneity(df: pd.DataFrame) -> str:
     var_des_ecart_types = df_stds.var(ddof=0)
 
     score_homogeneite = var_des_moyennes + var_des_ecart_types
-    return score_homogeneite.idxmin()
+    return str(score_homogeneite.idxmin())
 
 
 def plot_histogram(df: pd.DataFrame, features: list[str]) -> None:
@@ -60,7 +60,7 @@ def plot_histogram(df: pd.DataFrame, features: list[str]) -> None:
     plt.show()
 
 
-def main() -> None:
+def main() -> int:
     """Create histograms for each subject."""
     df = load_csv(DATASET)
     if df is None:
