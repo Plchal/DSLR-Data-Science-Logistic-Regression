@@ -1,14 +1,11 @@
 """Multi-classifier using a logistic regression."""
 
 from dataclasses import dataclass, field
-from typing import TypeAlias
 
 import numpy as np
-from numpy.typing import NDArray
 from pandas import DataFrame
 
-Array1D: TypeAlias = NDArray[np.float64]
-Array2D: TypeAlias = NDArray[np.float64]
+from variable import Array1D, Array2D
 
 
 @dataclass
@@ -60,6 +57,7 @@ def logistic_regression(
         parameter = HyperParameter()
     beta = np.zeros(training_set.features.shape[1] + 1)  # +1 for the design matrix.
     training_set.features = _create_design_matrix(training_set, stats)
+    # TODO: inverse standard score.
     return _gradient_descent(training_set, parameter, beta)
 
 
