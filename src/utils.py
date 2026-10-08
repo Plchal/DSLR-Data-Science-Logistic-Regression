@@ -28,3 +28,23 @@ def load_csv(path: str) -> pd.DataFrame | None:
     except AssertionError as error:
         print(f"{AssertionError.__name__}: {error}")
         return None
+
+
+def write_csv(path: str, data: pd.DataFrame) -> bool:
+    """Create a csv file from pd.DataFrame.
+
+    Args:
+        path (str): Path to the .csv file.
+        data (pd.DataFrame): parameter.
+
+    Returns:
+        None.
+    """
+    try:
+        if not path.lower().endswith(".csv"):
+            raise AssertionError("Files is not a .csv.")
+        data.to_csv(path, index=False, encoding="utf-8")
+        return True
+    except (PermissionError, AssertionError) as e:
+        print("Error", e)
+        return False
