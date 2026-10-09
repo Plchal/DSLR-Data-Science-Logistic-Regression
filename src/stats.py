@@ -42,9 +42,8 @@ def get_stats(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame containing statistics.
     """
-    numeric_df = df.select_dtypes(include=["number"])
     data = {}
-    for series_name, series in numeric_df.items():
+    for series_name, series in df.items():
         stats = _calculate_one_feature(series)
         data[series_name] = [
             stats.count,

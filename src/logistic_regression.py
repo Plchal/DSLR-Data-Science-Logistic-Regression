@@ -20,6 +20,7 @@ class TrainingSet:
 
     features: Array2D
     target: Array1D
+    stats: DataFrame
     nb_taget: int = field(init=False)
 
     def __post_init__(self) -> None:
@@ -40,9 +41,7 @@ class HyperParameter:
     iteration: int = 10000
 
 
-def logistic_regression(
-    training_set: TrainingSet, stats: DataFrame, parameter: HyperParameter | None = None
-) -> Array1D:
+def logistic_regression(training_set: TrainingSet, parameter: HyperParameter | None = None) -> Array1D:
     """Use the logistic regresssion to calculate the weights that will be used for the prediction.
 
     Args:
@@ -56,13 +55,13 @@ def logistic_regression(
     if parameter is None:
         parameter = HyperParameter()
     beta = np.zeros(training_set.features.shape[1] + 1)  # +1 for the design matrix.
-    training_set.features = _create_design_matrix(training_set, stats)
+    training_set.features = _create_design_matrix(training_set)
     # TODO: inverse standard score.
     return _gradient_descent(training_set, parameter, beta)
 
 
-def _create_design_matrix(training_set: TrainingSet, stats: DataFrame) -> Array2D:
-    features = _standard_score(training_set.features, stats)
+def _create_design_matrix(training_set: TrainingSet) -> Array2D:
+    features = _standard_score(training_set.features, training_set.stats)
     one_value_col = np.ones(training_set.nb_taget)  # This column is used to estimate the y-intercept.
     return np.column_stack([one_value_col, features])
 
