@@ -3,8 +3,8 @@
 import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
 
-from src.utils import load_csv
-from src.variable import COLS_TO_DROP, HOUSE_COLORS
+from utils import load_csv
+from variable import COLS_TO_DROP, HOUSE_COLORS
 
 
 def main() -> int:

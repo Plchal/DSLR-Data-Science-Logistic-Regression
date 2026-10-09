@@ -5,9 +5,9 @@ import sys
 
 from pandas import DataFrame
 
-from src.logistic_regression import TrainingSet, logistic_regression
-from src.stats import get_stats
-from src.utils import load_csv, write_csv
+from logistic_regression import TrainingSet, logistic_regression
+from stats import get_stats
+from utils import load_csv, write_csv
 
 
 def main() -> int:

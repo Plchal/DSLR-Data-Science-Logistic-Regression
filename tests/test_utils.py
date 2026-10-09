@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 from pytest import CaptureFixture
 
-from src.utils import load_csv
+from utils import load_csv
 
 
 def test_load_csv_success(tmp_path: Path) -> None:

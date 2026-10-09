@@ -7,9 +7,9 @@ import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from src.mathematics import calculate_pearson_correlation_coefficient
-from src.utils import load_csv
-from src.variable import COLS_TO_DROP, HOUSE_COLORS
+from mathematics import calculate_pearson_correlation_coefficient
+from utils import load_csv
+from variable import COLS_TO_DROP, HOUSE_COLORS
 
 
 def find_most_similarity_features(df: pd.DataFrame) -> list[str]:

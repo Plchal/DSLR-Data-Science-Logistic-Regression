@@ -6,8 +6,8 @@ import math
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from src.utils import load_csv
-from src.variable import COLS_TO_DROP, DATASET, HOUSE_COLORS, HOUSES
+from utils import load_csv
+from variable import COLS_TO_DROP, DATASET, HOUSE_COLORS, HOUSES
 
 
 def find_most_homogenous_feature(df: pd.DataFrame) -> str:

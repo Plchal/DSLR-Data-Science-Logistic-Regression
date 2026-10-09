@@ -2,8 +2,8 @@
 
 import argparse
 
-from src.stats import get_stats
-from src.utils import load_csv
+from stats import get_stats
+from utils import load_csv
 
 
 def main() -> int:
