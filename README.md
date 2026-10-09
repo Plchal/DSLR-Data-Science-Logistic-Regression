@@ -53,5 +53,4 @@ when the message does not follow the convention.
 
 ## Resources
 
-<!-- resources -->
-https://www.geeksforgeeks.org/python/pairplot-in-matplotlib/
+[Pair Plot](https://www.geeksforgeeks.org/python/pairplot-in-matplotlib/)

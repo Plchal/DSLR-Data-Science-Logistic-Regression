@@ -6,11 +6,11 @@ import math
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from utils import load_csv
-from variable import COLS_TO_DROP, DATASET, HOUSE_COLORS, HOUSES
+from src.utils import load_csv
+from src.variable import COLS_TO_DROP, DATASET, HOUSE_COLORS, HOUSES
 
 
-def homogeneity(df: pd.DataFrame) -> str:
+def find_most_homogenous_feature(df: pd.DataFrame) -> str:
     """."""
     dict_means = {}
     dict_stds = {}
@@ -20,10 +20,10 @@ def homogeneity(df: pd.DataFrame) -> str:
         dict_stds[house] = df_tmp.std(numeric_only=True)
     df_means = pd.DataFrame(dict_means).T
     df_stds = pd.DataFrame(dict_stds).T
-    var_des_moyennes = df_means.var(ddof=0)
-    var_des_ecart_types = df_stds.var(ddof=0)
+    var_means = df_means.var(ddof=0)
+    var_stds = df_stds.var(ddof=0)
 
-    score_homogeneite = var_des_moyennes + var_des_ecart_types
+    score_homogeneite = var_means + var_stds
     return str(score_homogeneite.idxmin())
 
 
@@ -79,7 +79,7 @@ def main() -> int:
         return 0
 
     if args.auto:
-        feature = [f"{homogeneity(df)}"]
+        feature = [f"{find_most_homogenous_feature(df)}"]
         plot_histogram(df, feature)
         return 0
 
@@ -87,9 +87,9 @@ def main() -> int:
         if args.subject not in df.columns:
             print(f"Error : The subject '{args.subject}' does not exist in the dataset.")
             valid_subject = [col for col in df.columns if col not in COLS_TO_DROP]
-            print(f"Subjects existing : {', '.join(valid_subject)}")
+            print(f"Subjects existing : {' , '.join(valid_subject)}")
             return 1
-        feature = [f"{args.subject}"]
+        feature = [args.subject]
         plot_histogram(df, feature)
         return 0
 

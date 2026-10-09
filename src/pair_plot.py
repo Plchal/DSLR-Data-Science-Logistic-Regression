@@ -3,7 +3,8 @@
 import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
 
-from utils import load_csv
+from src.utils import load_csv
+from src.variable import COLS_TO_DROP, HOUSE_COLORS
 
 
 def main() -> int:
@@ -12,12 +13,9 @@ def main() -> int:
     if df is None:
         return 1
 
-    cols_to_drop = ["Index", "First Name", "Last Name", "Birthday", "Best Hand", "Hogwarts House"]
-    features = [col for col in df.columns if col not in cols_to_drop]
+    features = [col for col in df.columns if col not in COLS_TO_DROP]
 
     n_features = len(features)
-
-    house_colors = {"Ravenclaw": "#222F5B", "Slytherin": "#1A472A", "Gryffindor": "#740001", "Hufflepuff": "#D89E15"}
 
     fig, axes = plt.subplots(nrows=n_features, ncols=n_features, figsize=(20, 20))
     fig.patch.set_facecolor("#F8F9FA")
@@ -30,13 +28,13 @@ def main() -> int:
             feat_y = features[i]
             feat_x = features[j]
             if i == j:
-                for house, color in house_colors.items():
+                for house, color in HOUSE_COLORS.items():
                     data = df[df["Hogwarts House"] == house][feat_x].dropna()
                     ax.hist(
                         data, bins=20, alpha=0.5, color=color, label=house, edgecolor="white", linewidth=0.7, zorder=3
                     )
             else:
-                for house, color in house_colors.items():
+                for house, color in HOUSE_COLORS.items():
                     data = df[df["Hogwarts House"] == house][[feat_x, feat_y]].dropna()
                     ax.scatter(data[feat_x], data[feat_y], alpha=0.6, color=color, s=2, linewidth=0)
             ax.set_xticks([])
@@ -56,7 +54,7 @@ def main() -> int:
 
     legend_handles = [
         mlines.Line2D([], [], color=color, marker="o", linestyle="None", markersize=10, label=house)
-        for house, color in house_colors.items()
+        for house, color in HOUSE_COLORS.items()
     ]
     fig.legend(
         handles=legend_handles, loc="upper center", ncol=4, fontsize=16, frameon=False, bbox_to_anchor=(0.5, 0.98)
