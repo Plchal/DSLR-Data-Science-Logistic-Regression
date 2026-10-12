@@ -1,5 +1,7 @@
 """Function to create the training set dictionary."""
 
+from typing import cast
+
 from pandas import DataFrame, Series
 
 from logistic_regression import TrainingSet
@@ -42,17 +44,18 @@ def _is_valid_house_col(df: DataFrame, house_col: str) -> bool:
 def _clean_data(df: DataFrame, house_col: str) -> DataFrame:
     index_col = "Index"
 
-    df_clean = df
+    df_clean = df.copy()
     if index_col in df_clean.columns:
         df_clean.drop(columns=[index_col], inplace=True)
     df_clean.drop_duplicates(inplace=True)
-    _remove_duplicate_same_house(df_clean, house_col)
+    df_clean = _remove_duplicate_same_house(df_clean, house_col)
     return df_clean
 
 
-def _remove_duplicate_same_house(df_clean: DataFrame, house_col: str) -> None:
-    df_without_house = df_clean.drop(columns=[house_col])
-    df_clean = df_clean[~df_clean.duplicated(subset=df_without_house, keep=False)]
+def _remove_duplicate_same_house(df_clean: DataFrame, house_col: str) -> DataFrame:
+    cols_without_house = df_clean.drop(columns=[house_col]).columns
+    df_filtered = df_clean[~df_clean.duplicated(subset=cols_without_house, keep=False)]
+    return cast(DataFrame, df_filtered)
 
 
 def _has_data(df_clean: DataFrame) -> bool:

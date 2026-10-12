@@ -43,7 +43,7 @@ def write_csv(path: str, data: pd.DataFrame) -> bool:
     try:
         if not path.lower().endswith(".csv"):
             raise AssertionError("Files is not a .csv.")
-        data.to_csv(path, index=False, encoding="utf-8")
+        data.to_csv(path, index=True, encoding="utf-8")
         return True
     except (PermissionError, AssertionError) as e:
         print("Error", e)

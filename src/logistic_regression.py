@@ -15,18 +15,18 @@ class TrainingSet:
     Args:
         features (Array2D): 2D array containing the observations.
         target (Array1D): 1D array containing the results.
-        nb_taget (int): Number of result.
+        nb_target (int): Number of result.
     """
 
     features_name: list[str]
     features: Array2D
     target: Array1D
     stats: DataFrame
-    nb_taget: int = field(init=False)
+    nb_target: int = field(init=False)
 
     def __post_init__(self) -> None:
         """Initialize the number of target."""
-        self.nb_taget = self.target.size  # one dimension, so we can use size.
+        self.nb_target = self.target.size  # one dimension, so we can use size.
 
 
 @dataclass
@@ -40,6 +40,8 @@ class HyperParameter:
 
     alpha: float = 0.1
     iteration: int = 10000
+    mini_batch: bool = False
+    sgd: bool = False
 
 
 def logistic_regression(training_set: TrainingSet, parameter: HyperParameter | None = None) -> Array1D:
@@ -57,6 +59,10 @@ def logistic_regression(training_set: TrainingSet, parameter: HyperParameter | N
     beta = np.zeros(training_set.features.shape[1] + 1)  # +1 for the design matrix.
     training_set.features = _create_design_matrix(training_set)
     # TODO: inverse standard score.
+    if parameter.mini_batch:
+        return _gradient_descent_sgd(training_set, parameter, beta, 32)
+    elif parameter.sgd:
+        return _gradient_descent_sgd(training_set, parameter, beta, 1)
     return _gradient_descent(training_set, parameter, beta)
 
 
@@ -64,7 +70,7 @@ def _create_design_matrix(training_set: TrainingSet) -> Array2D:
     mean: Array1D = training_set.stats.loc["mean"].values
     std: Array1D = training_set.stats.loc["std"].values
     features = _standard_score(training_set.features, mean, std)
-    one_value_col = np.ones(training_set.nb_taget)  # This column is used to estimate the y-intercept.
+    one_value_col = np.ones(training_set.nb_target)  # This column is used to estimate the y-intercept.
     return np.column_stack([one_value_col, features])
 
 
@@ -75,7 +81,7 @@ def _standard_score(features: Array2D, mean: Array1D, std: Array1D) -> Array2D:
 def _gradient_descent(training_set: TrainingSet, parameter: HyperParameter, beta: Array1D) -> Array1D:
     for _ in range(parameter.iteration):
         y_hat = _sigmoid(training_set.features @ beta)
-        gradient = (1 / training_set.nb_taget) * training_set.features.T @ (y_hat - training_set.target)
+        gradient = (1 / training_set.nb_target) * training_set.features.T @ (y_hat - training_set.target)
         beta -= parameter.alpha * gradient
     return beta
 
@@ -83,7 +89,7 @@ def _gradient_descent(training_set: TrainingSet, parameter: HyperParameter, beta
 def _gradient_descent_sgd(
     training_set: TrainingSet, parameter: HyperParameter, beta: Array1D, batch_size: int
 ) -> Array1D:
-    m = training_set.nb_taget
+    m = training_set.nb_target
 
     for _ in range(parameter.iteration):
         indices = np.random.permutation(m)
@@ -105,3 +111,10 @@ def _gradient_descent_sgd(
 def _sigmoid(z: Array1D) -> Array1D:
     """Converts any real number into a value between 0 and 1 to model probabilities."""
     return 1 / (1 + np.exp(-z))
+
+
+def _softmax(z: Array2D) -> Array2D:
+    """Converts a matrix of raw scores into a probability distribution for each row."""
+    z_max = np.max(z, axis=1, keepdims=True)
+    exp_z = np.exp(z - z_max)
+    return exp_z / np.sum(exp_z, axis=1, keepdims=True)
