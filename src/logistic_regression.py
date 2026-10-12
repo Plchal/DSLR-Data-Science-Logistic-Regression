@@ -80,6 +80,28 @@ def _gradient_descent(training_set: TrainingSet, parameter: HyperParameter, beta
     return beta
 
 
+def _gradient_descent_sgd(
+    training_set: TrainingSet, parameter: HyperParameter, beta: Array1D, batch_size: int
+) -> Array1D:
+    m = training_set.nb_taget
+
+    for _ in range(parameter.iteration):
+        indices = np.random.permutation(m)
+        features_shuffled = training_set.features[indices]
+        target_shuffled = training_set.target[indices]
+
+        for i in range(0, m, batch_size):
+            x_batch = features_shuffled[i : i + batch_size]
+            y_batch = target_shuffled[i : i + batch_size]
+
+            current_batch_size = len(y_batch)
+
+            y_hat = _sigmoid(x_batch @ beta)
+            gradient = (1 / current_batch_size) * x_batch.T @ (y_hat - y_batch)
+            beta -= parameter.alpha * gradient
+    return beta
+
+
 def _sigmoid(z: Array1D) -> Array1D:
     """Converts any real number into a value between 0 and 1 to model probabilities."""
     return 1 / (1 + np.exp(-z))
