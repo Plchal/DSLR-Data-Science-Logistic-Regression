@@ -8,7 +8,7 @@ from pandas import DataFrame
 from create_training_set import create_training_set_dict
 from logistic_regression import logistic_regression
 from utils import load_csv, write_csv
-from variable import HOUSES
+from variable import HOUSES, WEIGHTS_FILE
 
 
 def main() -> int:
@@ -19,11 +19,11 @@ def main() -> int:
     training_set_dict = create_training_set_dict(data_frame)
     if training_set_dict is None:
         return 1
-    weight_dict = {}
-    for house in HOUSES:
-        weight_dict[house] = logistic_regression(training_set_dict[house])
-    filename = "weights"
-    result = write_csv(filename + ".csv", DataFrame(weight_dict))
+    weights = DataFrame({house: logistic_regression(training_set_dict[house]) for house in HOUSES})
+    stats = training_set_dict[HOUSES[0]].stats
+    weights["mean"] = [0, *stats.loc["mean"].tolist()]
+    weights["std"] = [1, *stats.loc["std"].tolist()]
+    result = write_csv(WEIGHTS_FILE, weights)
     return 0 if result else 1
 
 
