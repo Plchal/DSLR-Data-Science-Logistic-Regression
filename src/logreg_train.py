@@ -23,6 +23,7 @@ def main() -> int:
     stats = training_set_dict[HOUSES[0]].stats
     weights["mean"] = [0, *stats.loc["mean"].tolist()]
     weights["std"] = [1, *stats.loc["std"].tolist()]
+    weights["feature"] = training_set_dict[HOUSES[0]].features_name
     result = write_csv(WEIGHTS_FILE, weights)
     return 0 if result else 1
 

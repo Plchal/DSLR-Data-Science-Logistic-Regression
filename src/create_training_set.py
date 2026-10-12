@@ -4,7 +4,7 @@ from pandas import DataFrame, Series
 
 from logistic_regression import TrainingSet
 from stats import get_stats
-from variable import HOUSES, Array1D, Array2D
+from variable import BETA0_NAME, HOUSES, Array1D, Array2D
 
 
 def create_training_set_dict(df: DataFrame) -> dict[str, TrainingSet] | None:
@@ -24,8 +24,8 @@ def create_training_set_dict(df: DataFrame) -> dict[str, TrainingSet] | None:
     if not _has_data(df_clean):
         return None
     stats = _create_stats(df_clean)
-    features, target_dict = _get_features_and_target(df_clean, house_col)
-    return _create_training_data(features, target_dict, stats)
+    features_name, features, target_dict = _get_features_and_target(df_clean, house_col)
+    return _create_training_data(features_name, features, target_dict, stats)
 
 
 def _is_valid_house_col(df: DataFrame, house_col: str) -> bool:
@@ -67,12 +67,14 @@ def _create_stats(df_clean: DataFrame) -> DataFrame:
     return get_stats(df_clean_stat)
 
 
-def _get_features_and_target(df_clean: DataFrame, house_col: str) -> tuple[Array2D, dict[str, Array1D]]:
+def _get_features_and_target(df_clean: DataFrame, house_col: str) -> tuple[list[str], Array2D, dict[str, Array1D]]:
     df_clean.dropna(inplace=True)
     target_dict = _get_tagets(df_clean[house_col])
     df_clean.drop(columns=[house_col], inplace=True)
-    features = df_clean.select_dtypes(include=["number"]).to_numpy()
-    return features, target_dict
+    features_clean = df_clean.select_dtypes(include=["number"])
+    features_name = [BETA0_NAME, *features_clean.columns.to_list()]
+    features = features_clean.to_numpy()
+    return features_name, features, target_dict
 
 
 def _get_tagets(house_col: Series) -> dict[str, Array1D]:
@@ -83,9 +85,9 @@ def _get_tagets(house_col: Series) -> dict[str, Array1D]:
 
 
 def _create_training_data(
-    features: Array2D, target_dict: dict[str, Array1D], stats: DataFrame
+    features_name: list[str], features: Array2D, target_dict: dict[str, Array1D], stats: DataFrame
 ) -> dict[str, TrainingSet]:
     training_set_dict = {}
     for house in HOUSES:
-        training_set_dict[house] = TrainingSet(features, target_dict[house], stats)
+        training_set_dict[house] = TrainingSet(features_name, features, target_dict[house], stats)
     return training_set_dict

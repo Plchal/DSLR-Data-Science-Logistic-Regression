@@ -18,6 +18,7 @@ class TrainingSet:
         nb_taget (int): Number of result.
     """
 
+    features_name: list[str]
     features: Array2D
     target: Array1D
     stats: DataFrame
@@ -46,7 +47,6 @@ def logistic_regression(training_set: TrainingSet, parameter: HyperParameter | N
 
     Args:
         training_set (TrainingSet): Data used for the training.
-        stats (DataFrame): Statistics related to the training set.
         parameter (HyperParameter): Parameter of the training.
 
     Returns:
@@ -61,14 +61,14 @@ def logistic_regression(training_set: TrainingSet, parameter: HyperParameter | N
 
 
 def _create_design_matrix(training_set: TrainingSet) -> Array2D:
-    features = _standard_score(training_set.features, training_set.stats)
+    mean: Array1D = training_set.stats.loc["mean"].values
+    std: Array1D = training_set.stats.loc["std"].values
+    features = _standard_score(training_set.features, mean, std)
     one_value_col = np.ones(training_set.nb_taget)  # This column is used to estimate the y-intercept.
     return np.column_stack([one_value_col, features])
 
 
-def _standard_score(features: Array2D, stats: DataFrame) -> Array2D:
-    mean: Array2D = stats.loc["mean"].values
-    std: Array2D = stats.loc["std"].values
+def _standard_score(features: Array2D, mean: Array1D, std: Array1D) -> Array2D:
     return (features - mean) / std  # TODO: check matrix 0 division ?
 
 
