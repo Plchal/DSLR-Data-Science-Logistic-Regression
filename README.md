@@ -8,6 +8,18 @@
 
 <!-- description -->
 
+### Bonus
+- More fields for describe []
+- How to answer at : Which Hogwarts course has a homogeneous score distribution between all four houses ? []
+- How to answer at : What are the two features that are similar ? []
+- How to answer at : From this visualization, which features are you going to use for your logistic regression ? []
+- Stochiastic Gradient Descent []
+- Mini Batch []
+- Soft - Max []
+- Momentum []
+- Adam []
+- Plot cost []
+
 ## Tools
 
 | Tool | Role |
