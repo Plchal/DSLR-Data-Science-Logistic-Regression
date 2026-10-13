@@ -1,6 +1,7 @@
 """This program take a dataset as a parameter and display informations for all numerical features."""
 
 import argparse
+import sys
 
 from stats import get_stats
 from utils import load_csv
@@ -13,11 +14,12 @@ def main() -> int:
     args = parser.parse_args()
     data_frame = load_csv(args.file)
     if data_frame is None:
-        return 0
-    stats = get_stats(data_frame)
+        return 1
+    numeric = data_frame.select_dtypes(include=["number"])
+    stats = get_stats(numeric)
     print(stats)
     return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
