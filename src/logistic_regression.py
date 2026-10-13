@@ -104,6 +104,23 @@ class TrainingResult(Generic[T]):
     loss_history: list[float]
 
 
+@dataclass
+class PredictionSet:
+    """Dataclass used for the prediction.
+
+    Args:
+        weights (list[list[float]]): Weights define by the training.
+        features (list[list[float]]): features of the data to be predicted.
+        mean (list[list[float]]): Mean of each features during the training.
+        std (list[list[float]]): Standard deviation of each features during the training.
+    """
+
+    weights: list[list[float]]
+    features: list[list[float]]
+    mean: list[list[float]]
+    std: list[list[float]]
+
+
 def logistic_regression(training_set: TrainingSet, parameter: HyperParameter | None = None) -> TrainingResult[Array1D]:
     """Use the logistic regresssion to calculate the weights that will be used for the prediction.
 
@@ -228,3 +245,26 @@ def _softmax(z: Array2D) -> Array2D:
     z_max = np.max(z, axis=1, keepdims=True)
     exp_z = np.exp(z - z_max)
     return exp_z / np.sum(exp_z, axis=1, keepdims=True)
+
+
+def create_prediction(prediction_set: PredictionSet) -> list[float]:
+    """Use the weights and training data to predict the probability of belonging to class 1.
+
+    Args:
+        prediction_set (PredictionSet): Prediction set defined by weights, training data and the features of the data
+        to be predicted.
+
+    Returns:
+        list[float]: Result of each predictions.
+    """
+    y_pred = []
+    for i_row in range(len(prediction_set.features)):
+        feature = np.array(prediction_set.features[i_row])
+        mean = np.array(prediction_set.mean[i_row])
+        std = np.array(prediction_set.std[i_row])
+        standard_feature = _standard_score(feature, mean, std)
+        standard_feature = np.array([1, *standard_feature])
+        weights = np.array(prediction_set.weights[i_row])
+        pred = _sigmoid(standard_feature @ weights)
+        y_pred.append(float(pred))
+    return y_pred
