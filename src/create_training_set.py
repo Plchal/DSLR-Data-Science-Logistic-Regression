@@ -2,9 +2,10 @@
 
 from typing import cast
 
+import numpy as np
 from pandas import DataFrame, Series
 
-from logistic_regression import TrainingSet
+from logistic_regression import MulticlassTrainingSet, TrainingSet
 from stats import get_stats
 from variable import BETA0_NAME, HOUSES, Array1D, Array2D
 
@@ -18,8 +19,32 @@ def create_training_set_dict(df: DataFrame) -> dict[str, TrainingSet] | None:
     Returns:
         dict[str, TrainingSet] | None: Dictionary of training set of each house or None on failed.
     """
-    house_col = "Hogwarts House"
+    prepared = _prepare_dataset(df)
+    if prepared is None:
+        return None
+    features_name, features, target_dict, stats = prepared
+    return _create_training_data(features_name, features, target_dict, stats)
 
+
+def create_multiclass_training_set(df: DataFrame) -> MulticlassTrainingSet | None:
+    """Create the multiclass (softmax) training set.
+
+    Args:
+        df (DataFrame): Data frame representing the data in the CSV file.
+
+    Returns:
+        MulticlassTrainingSet | None: Training set with the one-hot target or None on failed.
+    """
+    prepared = _prepare_dataset(df)
+    if prepared is None:
+        return None
+    features_name, features, target_dict, stats = prepared
+    one_hot = np.column_stack([target_dict[house] for house in HOUSES])
+    return MulticlassTrainingSet(features_name, features, one_hot, stats)
+
+
+def _prepare_dataset(df: DataFrame) -> tuple[list[str], Array2D, dict[str, Array1D], DataFrame] | None:
+    house_col = "Hogwarts House"
     if not _is_valid_house_col(df, house_col):
         return None
     df_clean = _clean_data(df, house_col)
@@ -27,7 +52,7 @@ def create_training_set_dict(df: DataFrame) -> dict[str, TrainingSet] | None:
         return None
     stats = _create_stats(df_clean)
     features_name, features, target_dict = _get_features_and_target(df_clean, house_col)
-    return _create_training_data(features_name, features, target_dict, stats)
+    return features_name, features, target_dict, stats
 
 
 def _is_valid_house_col(df: DataFrame, house_col: str) -> bool:

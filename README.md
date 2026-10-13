@@ -15,10 +15,10 @@
 - How to answer at : From this visualization, which features are you going to use for your logistic regression ? []
 - Stochiastic Gradient Descent [x]
 - Mini Batch [x]
-- Soft - Max []
+- Soft - Max [x]
 - Momentum []
 - Adam []
-- Plot cost []
+- Plot cost [x]
 
 ## Tools
 
@@ -32,9 +32,17 @@
 
 ### Build and run
 
+Train the one-vs-all classifiers (default) or a single softmax classifier:
+
 ```bash
-python3 -m src.main
+python3 src/logreg_train.py -f dataset_train.csv
+python3 src/logreg_train.py -f dataset_train.csv --softmax
 ```
+
+Hyperparameters and optimizer can be selected with
+`--optimizer {batch,sgd,minibatch}`, `--alpha`, `--iteration`, `--batch_size`
+and `--seed`. The weights are written to `weights.csv` (one-vs-all) or
+`weights_softmax.csv` (`--softmax`), or to `--output <file>`.
 
 ### With Nix
 
