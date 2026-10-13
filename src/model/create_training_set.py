@@ -5,9 +5,10 @@ from typing import cast
 import numpy as np
 from pandas import DataFrame, Series
 
-from logistic_regression import MulticlassTrainingSet, TrainingSet
-from stats import get_stats
-from variable import BETA0_NAME, HOUSES, Array1D, Array2D
+from utils.variable import BETA0_NAME, HOUSES, Array1D, Array2D
+
+from .logistic_regression import MulticlassTrainingSet, TrainingSet
+from .stats import get_stats
 
 
 def create_training_set_dict(df: DataFrame) -> dict[str, TrainingSet] | None:

@@ -11,8 +11,8 @@ from sklearn.model_selection import RepeatedStratifiedKFold
 from sklearn.multiclass import OneVsRestClassifier
 
 sys.path.insert(0, "src")
-from logistic_regression import TrainingSet, _build_design_matrix, _sigmoid, logistic_regression
-from variable import HOUSES
+from model import TrainingSet, _build_design_matrix, _sigmoid, logistic_regression
+from utils.variable import HOUSES
 
 FEATURES = ["Astronomy", "Herbology", "Defense Against the Dark Arts", "Ancient Runes"]  # ou les 13
 df = pd.read_csv("dataset_train.csv")

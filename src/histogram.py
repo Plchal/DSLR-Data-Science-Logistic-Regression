@@ -8,11 +8,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from utils import load_csv
-from variable import COLS_TO_DROP, DATASET, HOUSE_COLORS, HOUSES
+from utils.variable import COLS_TO_DROP, DATASET, HOUSE_COLORS, HOUSES
 
 
 def find_most_homogenous_feature(df: pd.DataFrame) -> str:
-    """."""
+    """TODO."""
     dict_means = {}
     dict_stds = {}
     for house in HOUSES:
@@ -29,7 +29,7 @@ def find_most_homogenous_feature(df: pd.DataFrame) -> str:
 
 
 def plot_histogram(df: pd.DataFrame, features: list[str]) -> None:
-    """."""
+    """TODO."""
     ncases = math.ceil(math.sqrt(len(features)))
     _fig, axes = plt.subplots(nrows=ncases, ncols=ncases, figsize=(16, 16), squeeze=False)
     _fig.patch.set_facecolor("#F8F9FA")

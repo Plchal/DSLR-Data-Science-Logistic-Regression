@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from mathematics import (
+from utils import (
     calculate_first_quartile,
     calculate_mean,
     calculate_median,

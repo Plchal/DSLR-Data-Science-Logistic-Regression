@@ -1,4 +1,4 @@
-"""."""
+"""TODO."""
 
 import argparse
 import sys
@@ -8,9 +8,8 @@ import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from mathematics import calculate_pearson_correlation_coefficient
-from utils import load_csv
-from variable import COLS_TO_DROP, DATASET, HOUSE_COLORS
+from utils import calculate_pearson_correlation_coefficient, load_csv
+from utils.variable import COLS_TO_DROP, DATASET, HOUSE_COLORS
 
 
 def find_most_similarity_features(df: pd.DataFrame) -> list[str]:
@@ -35,7 +34,7 @@ def find_most_similarity_features(df: pd.DataFrame) -> list[str]:
 
 
 def show_scatter_plot(df: pd.DataFrame, features: list[str]) -> None:
-    """."""
+    """TODO."""
     n_features = len(features)
 
     fig, axes = plt.subplots(nrows=n_features, ncols=n_features, figsize=(20, 20))
@@ -87,7 +86,7 @@ def show_scatter_plot(df: pd.DataFrame, features: list[str]) -> None:
 
 
 def main() -> int:
-    """."""
+    """TODO."""
     df = load_csv(DATASET)
     if df is None:
         return 1

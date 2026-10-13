@@ -3,7 +3,7 @@
 import pandas as pd
 import pytest
 
-from stats import get_stats
+from model import get_stats
 
 
 @pytest.fixture

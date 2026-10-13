@@ -3,8 +3,9 @@
 import pandas as pd
 from pandas import DataFrame
 
-from logistic_regression import PredictionSet
-from variable import BETA0_NAME, HOUSES, PREDICTION_FILE, WEIGHTS_FILE
+from utils.variable import BETA0_NAME, HOUSES, PREDICTION_FILE, WEIGHTS_FILE
+
+from .logistic_regression import PredictionSet
 
 
 def create_prediction_set(weights: DataFrame, df: DataFrame) -> dict[str, PredictionSet] | None:

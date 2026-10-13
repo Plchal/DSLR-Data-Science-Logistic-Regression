@@ -7,7 +7,7 @@ from typing import Generic, TypeVar
 import numpy as np
 from pandas import DataFrame
 
-from variable import DEFAULT_BATCH_SIZE, EPSILON, Array1D, Array2D, ArrayIndex, Optimizer
+from utils.variable import DEFAULT_BATCH_SIZE, EPSILON, Array1D, Array2D, ArrayIndex, Optimizer
 
 T = TypeVar("T", bound=np.ndarray)
 

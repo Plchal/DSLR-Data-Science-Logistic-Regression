@@ -6,10 +6,15 @@ from typing import get_args
 
 from pandas import DataFrame
 
-from create_training_set import create_multiclass_training_set, create_training_set_dict
-from logistic_regression import HyperParameter, logistic_regression, softmax_regression
+from model import (
+    HyperParameter,
+    create_multiclass_training_set,
+    create_training_set_dict,
+    logistic_regression,
+    softmax_regression,
+)
 from utils import load_csv, write_csv
-from variable import (
+from utils.variable import (
     DATASET,
     DEFAULT_BATCH_SIZE,
     HOUSES,

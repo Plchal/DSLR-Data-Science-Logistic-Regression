@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-from stats import get_stats
+from model import get_stats
 from utils import load_csv
 
 
