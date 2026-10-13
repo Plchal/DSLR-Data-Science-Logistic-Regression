@@ -4,12 +4,12 @@ import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
 
 from utils import load_csv
-from variable import COLS_TO_DROP, HOUSE_COLORS
+from variable import COLS_TO_DROP, DATASET, HOUSE_COLORS
 
 
 def main() -> int:
     """."""
-    df = load_csv("dataset_train.csv")
+    df = load_csv(DATASET)
     if df is None:
         return 1
 

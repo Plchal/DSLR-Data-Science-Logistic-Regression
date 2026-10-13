@@ -9,7 +9,7 @@ import pandas as pd
 
 from mathematics import calculate_pearson_correlation_coefficient
 from utils import load_csv
-from variable import COLS_TO_DROP, HOUSE_COLORS
+from variable import COLS_TO_DROP, DATASET, HOUSE_COLORS
 
 
 def find_most_similarity_features(df: pd.DataFrame) -> list[str]:
@@ -87,7 +87,7 @@ def show_scatter_plot(df: pd.DataFrame, features: list[str]) -> None:
 
 def main() -> int:
     """."""
-    df = load_csv("dataset_train.csv")
+    df = load_csv(DATASET)
     if df is None:
         return 1
 
