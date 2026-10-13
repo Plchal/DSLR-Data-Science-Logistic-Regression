@@ -7,7 +7,7 @@ from typing import Generic, TypeVar
 import numpy as np
 from pandas import DataFrame
 
-from variable import DEFAULT_BATCH_SIZE, Array1D, Array2D, ArrayIndex, Optimizer
+from variable import DEFAULT_BATCH_SIZE, EPSILON, Array1D, Array2D, ArrayIndex, Optimizer
 
 T = TypeVar("T", bound=np.ndarray)
 
@@ -208,14 +208,12 @@ def _optimize_softmax(
 
 
 def _binary_cross_entropy(probability: Array1D, target: Array1D) -> float:
-    epsilon = 1e-12
-    clipped = np.clip(probability, epsilon, 1 - epsilon)
+    clipped = np.clip(probability, EPSILON, 1 - EPSILON)
     return float(-np.mean(target * np.log(clipped) + (1 - target) * np.log(1 - clipped)))
 
 
 def _categorical_cross_entropy(probability: Array2D, one_hot: Array2D) -> float:
-    epsilon = 1e-12
-    clipped = np.clip(probability, epsilon, 1 - epsilon)
+    clipped = np.clip(probability, EPSILON, 1 - EPSILON)
     return float(-np.mean(np.sum(one_hot * np.log(clipped), axis=1)))
 
 

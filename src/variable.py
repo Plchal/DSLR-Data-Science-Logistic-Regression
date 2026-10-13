@@ -15,6 +15,7 @@ BETA0_NAME = "beta0"
 
 Optimizer: TypeAlias = Literal["batch", "sgd", "minibatch"]
 DEFAULT_BATCH_SIZE = 32
+EPSILON = 1e-12
 
 Array1D: TypeAlias = np.typing.NDArray[np.float64]
 Array2D: TypeAlias = np.typing.NDArray[np.float64]
