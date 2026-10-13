@@ -2,6 +2,7 @@
 
 import argparse
 import math
+import sys
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -99,4 +100,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -1,6 +1,7 @@
 """."""
 
 import argparse
+import sys
 from itertools import combinations
 
 import matplotlib.lines as mlines
@@ -128,4 +129,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
