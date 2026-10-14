@@ -1,7 +1,6 @@
 """TODO."""
 
 from .file_handling import load_csv, write_csv
-from .loss_plot import plot_loss
 from .mathematics import (
     calculate_first_quartile,
     calculate_mean,
@@ -19,6 +18,5 @@ __all__ = [
     "calculate_std",
     "calculate_third_quartile",
     "load_csv",
-    "plot_loss",
     "write_csv",
 ]
