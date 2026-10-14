@@ -14,6 +14,7 @@ from model import (
     softmax_regression,
 )
 from utils import load_csv, write_csv
+from utils.loss_plot import plot_loss
 from utils.variable import (
     DATASET,
     DEFAULT_BATCH_SIZE,
@@ -37,6 +38,7 @@ def main() -> int:
     parser.add_argument("--batch_size", type=int, default=DEFAULT_BATCH_SIZE)
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--output", type=str, default=None, help="Output file (default depends on the model)")
+    parser.add_argument("-d", "--display", action="store_true", help="Display loss evolution")
     args = parser.parse_args()
 
     data_frame = load_csv(args.file) if args.file else load_csv(DATASET)
@@ -62,6 +64,7 @@ def main() -> int:
         features_name = multiclass_set.features_name
         final_loss = result.loss_history[-1]
         default_output = WEIGHTS_SOFTMAX_FILE
+        histories = {"softmax": result.loss_history}
     else:
         training_set_dict = create_training_set_dict(data_frame)
         if training_set_dict is None:
@@ -72,6 +75,7 @@ def main() -> int:
         features_name = training_set_dict[HOUSES[0]].features_name
         final_loss = sum(result.loss_history[-1] for result in results.values()) / len(HOUSES)
         default_output = WEIGHTS_FILE
+        histories = {house: results[house].loss_history for house in HOUSES}
 
     weights["mean"] = [0, *stats.loc["mean"].tolist()]
     weights["std"] = [1, *stats.loc["std"].tolist()]
@@ -81,6 +85,8 @@ def main() -> int:
     written = write_csv(output, weights)
     mode = "softmax" if args.softmax else "one-vs-all"
     print(f"[{mode}] optimizer={optimizer} alpha={args.alpha} iter={args.iteration} loss={final_loss:.4f} -> {output}")
+    if args.display:
+        plot_loss(histories, optimizer)
     return 0 if written else 1
 
 
