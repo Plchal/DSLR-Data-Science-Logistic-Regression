@@ -80,6 +80,8 @@ class HyperParameter:
     batch_size: int = DEFAULT_BATCH_SIZE
     seed: int | None = None
     track_loss: bool = True
+    delta_early_stop: float = 1e-6
+    watting: int = 1
 
     def __post_init__(self) -> None:
         """TODO."""
@@ -199,28 +201,52 @@ def _step_softmax(features: Array2D, one_hot: Array2D, weights: Array2D, alpha: 
 def _optimize_binary(
     features: Array2D, target: Array1D, beta: Array1D, parameter: HyperParameter
 ) -> TrainingResult[Array1D]:
+    best_loss = float("inf")
+    best_weight = beta.copy()
+    watting = 0
+
     rng = np.random.default_rng(parameter.seed)
     batch_size = _effective_batch_size(parameter, features.shape[0])
     loss_history: list[float] = []
     for _ in range(parameter.iteration):
         for indices in _iter_batches(features.shape[0], batch_size, rng):
             _step_binary(features[indices], target[indices], beta, parameter.alpha)
+        loss = _binary_cross_entropy(_sigmoid(features @ beta), target)
         if parameter.track_loss:
-            loss_history.append(_binary_cross_entropy(_sigmoid(features @ beta), target))
+            loss_history.append(loss)
+        if loss < best_loss - parameter.delta_early_stop:
+            best_loss, best_weight, watting = loss, beta.copy(), 0
+        else:
+            watting += 1
+            if parameter.watting > 0 and watting >= parameter.watting:
+                beta = best_weight
+                break
     return TrainingResult[Array1D](beta, loss_history)
 
 
 def _optimize_softmax(
     features: Array2D, one_hot: Array2D, weights: Array2D, parameter: HyperParameter
 ) -> TrainingResult[Array2D]:
+    best_loss = float("inf")
+    best_weights = weights.copy()
+    watting = 0
+
     rng = np.random.default_rng(parameter.seed)
     batch_size = _effective_batch_size(parameter, features.shape[0])
     loss_history: list[float] = []
     for _ in range(parameter.iteration):
         for indices in _iter_batches(features.shape[0], batch_size, rng):
             _step_softmax(features[indices], one_hot[indices], weights, parameter.alpha)
+        loss = _categorical_cross_entropy(_softmax(features @ weights), one_hot)
         if parameter.track_loss:
-            loss_history.append(_categorical_cross_entropy(_softmax(features @ weights), one_hot))
+            loss_history.append(loss)
+        if loss < best_loss - parameter.delta_early_stop:
+            best_loss, best_weights, watting = loss, weights.copy(), 0
+        else:
+            watting += 1
+            if parameter.watting > 0 and watting >= parameter.watting:
+                weights = best_weights
+                break
     return TrainingResult[Array2D](weights, loss_history)
 
 
