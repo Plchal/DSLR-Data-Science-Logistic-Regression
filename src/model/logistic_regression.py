@@ -9,6 +9,8 @@ from pandas import DataFrame
 
 from utils.variable import DEFAULT_BATCH_SIZE, EPSILON, Array1D, Array2D, ArrayIndex, Optimizer
 
+from .one_vs_all import OneVsAll
+
 T = TypeVar("T", bound=np.ndarray)
 
 
@@ -120,6 +122,52 @@ class PredictionSet:
     mean: list[list[float]]
     std: list[list[float]]
 
+def logistic_regression_binary(training_set: TrainingSet, parameter: HyperParameter | None = None) -> TrainingResult[Array1D]:
+    """Use the logistic regresssion to calculate the weights that will be used for the prediction.
+
+    Args:
+        training_set (TrainingSet): Data used for the training.
+        parameter (HyperParameter): Parameter of the training.
+
+    Returns:
+        TrainingResult[Array1D]: Parameter vector adjusted during gradient descent and loss history.
+    """
+    model = OneVsAll()
+    logistic_regression(model, parameter)
+
+
+def logistic_regression(model: OneVsAll | AllVsAll, parameter: HyperParameter | None) -> None:
+    if parameter is None:
+        parameter = HyperParameter()
+    features = _build_design_matrix(model)
+    weight = np.zeros(features.shape[1])  # +1 for the design matrix.
+    return model.optimize(features, weight, parameter)
+
+
+
+
+def _optimize_binary(
+    features: Array2D, target: Array1D, beta: Array1D, parameter: HyperParameter
+) -> TrainingResult[Array1D]:
+    rng = np.random.default_rng(parameter.seed)
+    batch_size = _effective_batch_size(parameter, features.shape[0])
+    loss_history: list[float] = []
+    for _ in range(parameter.iteration):
+        for indices in _iter_batches(features.shape[0], batch_size, rng):
+            _step_binary(features[indices], target[indices], beta, parameter.alpha)
+        if parameter.track_loss:
+            loss_history.append(_binary_cross_entropy(_sigmoid(features @ beta), target))
+    return TrainingResult[Array1D](beta, loss_history)
+
+
+
+
+
+
+
+
+
+#------------------------------------------------------------------------------------------------------------------------------
 
 def logistic_regression(training_set: TrainingSet, parameter: HyperParameter | None = None) -> TrainingResult[Array1D]:
     """Use the logistic regresssion to calculate the weights that will be used for the prediction.
@@ -138,7 +186,7 @@ def logistic_regression(training_set: TrainingSet, parameter: HyperParameter | N
     return _optimize_binary(features, training_set.target, beta, parameter)
 
 
-def softmax_regression(
+def logistic_regression_multinomial(
     training_set: MulticlassTrainingSet, parameter: HyperParameter | None = None
 ) -> TrainingResult[Array2D]:
     """Use the softmax regression to train a single multiclass classifier.
