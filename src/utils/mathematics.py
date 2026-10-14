@@ -17,32 +17,33 @@ def calculate_mean(feature: pd.Series) -> float:
     return total / feature.size
 
 
-def calculate_variance_ddof0(values: list[float], mean: float) -> float:
-    """Variance Calculation ddof=0 (population).TODO."""
-    if len(values) == 0:
-        return float("nan")
+# TODO : remove or keep function ? If keep add test with pytest.
+# def calculate_variance_ddof0(values: list[float], mean: float) -> float:
+#    """Variance Calculation ddof=0 (population)."""
+#    if len(values) == 0:
+#        return float("nan")
 
-    variance = 0.0
-    for value in values:
-        diff = value - mean
-        variance += diff * diff
-    variance = variance / len(values)  # Divisé par N (ddof=0)
-    return max(variance, 0.0)
+#    variance = 0.0
+#    for value in values:
+#        diff = value - mean
+#        variance += diff * diff
+#    variance = variance / len(values)  # Divisé par N (ddof=0)
+#    return max(variance, 0.0)
 
 
 def calculate_first_quartile(feature: pd.Series) -> float:
-    """First Quartile Calculation."""
+    """First Quartile Calculation. The sequence isn't sorted in the function."""
     rank = (feature.size + 3) / 4 - 1
-    return calculate_quartile(feature, rank)
+    return _calculate_quartile(feature, rank)
 
 
 def calculate_third_quartile(feature: pd.Series) -> float:
-    """Third Quartile Calculation."""
+    """Third Quartile Calculation. The sequence isn't sorted in the function."""
     rank = (3 * feature.size + 1) / 4 - 1
-    return calculate_quartile(feature, rank)
+    return _calculate_quartile(feature, rank)
 
 
-def calculate_quartile(feature: pd.Series, rank: float) -> float:
+def _calculate_quartile(feature: pd.Series, rank: float) -> float:
     """Second Quartile Calculation."""
     index = int(rank)
     floating_value = rank - index
@@ -56,7 +57,7 @@ def calculate_quartile(feature: pd.Series, rank: float) -> float:
 
 
 def calculate_median(feature: pd.Series) -> float:
-    """Median Calculation."""
+    """Median Calculation. The sequence isn't sorted in the function."""
     size = feature.size
     if size % 2 != 0:
         return float(feature.iloc[(size - 1) // 2])
@@ -66,7 +67,7 @@ def calculate_median(feature: pd.Series) -> float:
 
 
 def calculate_std(feature: pd.Series, mean: float) -> float:
-    """Standart Deviation Calculation."""
+    """Standart Deviation Calculation with Bessel's correction."""
     min_size: int = 2
 
     if feature.size < min_size:
@@ -81,7 +82,7 @@ def calculate_std(feature: pd.Series, mean: float) -> float:
 
 
 def calculate_pearson_correlation_coefficient(x_feature: pd.Series, y_feature: pd.Series) -> float:
-    """."""
+    """TODO."""
     df = pd.concat([x_feature, y_feature], axis=1).dropna()
     x = df.iloc[:, 0]
     y = df.iloc[:, 1]
