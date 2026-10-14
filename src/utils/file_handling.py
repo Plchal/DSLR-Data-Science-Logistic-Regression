@@ -15,18 +15,15 @@ def load_csv(path: str) -> pd.DataFrame | None:
     try:
         if not path.lower().endswith(".csv"):
             raise AssertionError("Files is not a .csv.")
-
-        try:
-            dataset = pd.read_csv(path)
-        except PermissionError as exc:
-            raise AssertionError("Permissions dinied.") from exc
-        except FileNotFoundError as exc:
-            raise AssertionError("Files not found.") from exc
+        dataset = pd.read_csv(path)
 
         return dataset
 
     except AssertionError as error:
         print(f"{AssertionError.__name__}: {error}")
+        return None
+    except Exception as error:  # noqa: BLE001
+        print(f"{Exception.__name__}: {error}")
         return None
 
 
@@ -38,13 +35,17 @@ def write_csv(path: str, data: pd.DataFrame) -> bool:
         data (pd.DataFrame): parameter.
 
     Returns:
-        None.
+        bool: true for success, false else.
     """
     try:
         if not path.lower().endswith(".csv"):
             raise AssertionError("Files is not a .csv.")
         data.to_csv(path, index=False, encoding="utf-8")
         return True
-    except (PermissionError, AssertionError) as e:
-        print("Error", e)
+
+    except AssertionError as error:
+        print(f"{AssertionError.__name__}: {error}")
+        return False
+    except Exception as error:  # noqa: BLE001
+        print(f"{Exception.__name__}: {error}")
         return False
