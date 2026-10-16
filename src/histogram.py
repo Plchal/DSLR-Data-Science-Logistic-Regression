@@ -12,7 +12,7 @@ from utils.variable import COLS_TO_DROP, DATASET, HOUSE_COLORS, HOUSES
 
 
 def find_most_homogenous_feature(df: pd.DataFrame) -> str:
-    """TODO."""
+    """Find the most homogenous features in dataset base it on the average and normalization that are most similar across the 4 houses."""
     dict_means = {}
     dict_stds = {}
     for house in HOUSES:
@@ -29,7 +29,7 @@ def find_most_homogenous_feature(df: pd.DataFrame) -> str:
 
 
 def plot_histogram(df: pd.DataFrame, features: list[str]) -> None:
-    """TODO."""
+    """Display the histogram plot with matplotlib."""
     ncases = math.ceil(math.sqrt(len(features)))
     _fig, axes = plt.subplots(nrows=ncases, ncols=ncases, figsize=(16, 16), squeeze=False)
     _fig.patch.set_facecolor("#F8F9FA")
