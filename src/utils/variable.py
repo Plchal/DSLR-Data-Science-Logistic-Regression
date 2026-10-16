@@ -1,4 +1,4 @@
-"""TODO."""
+"""Definition of constants, configuration variables, and type aliases."""
 
 from typing import Literal, TypeAlias
 

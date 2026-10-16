@@ -28,7 +28,7 @@ from utils.variable import (
 
 
 class TrainResult(TypedDict):
-    """TODO."""
+    """Data structure representing the results following the training of a model."""
 
     weights: DataFrame
     stats: DataFrame

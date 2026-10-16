@@ -1,4 +1,4 @@
-"""TODO."""
+"""Script for displaying a matrix of feature pairs (pair plot)."""
 
 import sys
 
@@ -10,7 +10,7 @@ from utils.variable import COLS_TO_DROP, DATASET, HOUSE_COLORS
 
 
 def main() -> int:
-    """TODO."""
+    """Main entry point for the script."""
     df = load_csv(DATASET)
     if df is None:
         return 1

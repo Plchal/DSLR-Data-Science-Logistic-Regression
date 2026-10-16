@@ -84,7 +84,7 @@ class HyperParameter:
     watting: int = 1
 
     def __post_init__(self) -> None:
-        """TODO."""
+        """Verifiy the init value."""
         if self.alpha <= 0:
             raise ValueError("alpha must be strictly positive")
         if self.iteration < 1:

@@ -17,20 +17,6 @@ def calculate_mean(feature: pd.Series) -> float:
     return total / feature.size
 
 
-# TODO : remove or keep function ? If keep add test with pytest.
-# def calculate_variance_ddof0(values: list[float], mean: float) -> float:
-#    """Variance Calculation ddof=0 (population)."""
-#    if len(values) == 0:
-#        return float("nan")
-
-#    variance = 0.0
-#    for value in values:
-#        diff = value - mean
-#        variance += diff * diff
-#    variance = variance / len(values)  # Divisé par N (ddof=0)
-#    return max(variance, 0.0)
-
-
 def calculate_first_quartile(feature: pd.Series) -> float:
     """First Quartile Calculation. The sequence isn't sorted in the function."""
     rank = (feature.size + 3) / 4 - 1
@@ -82,7 +68,7 @@ def calculate_std(feature: pd.Series, mean: float) -> float:
 
 
 def calculate_pearson_correlation_coefficient(x_feature: pd.Series, y_feature: pd.Series) -> float:
-    """TODO."""
+    """Calculates the Pearson correlation coefficient between two data series."""
     df = pd.concat([x_feature, y_feature], axis=1).dropna()
     x = df.iloc[:, 0]
     y = df.iloc[:, 1]

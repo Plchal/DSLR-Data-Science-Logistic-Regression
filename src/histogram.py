@@ -1,4 +1,4 @@
-"""."""
+"""Script for displaying histograms to analyze the distribution of grades."""
 
 import argparse
 import math
@@ -29,7 +29,7 @@ def find_most_homogenous_feature(df: pd.DataFrame) -> str:
 
 
 def plot_histogram(df: pd.DataFrame, features: list[str]) -> None:
-    """Display the histogram plot with matplotlib."""
+    """Displays a  histogram matrix using matplotlib for the specified features."""
     ncases = math.ceil(math.sqrt(len(features)))
     _fig, axes = plt.subplots(nrows=ncases, ncols=ncases, figsize=(16, 16), squeeze=False)
     _fig.patch.set_facecolor("#F8F9FA")
@@ -62,7 +62,7 @@ def plot_histogram(df: pd.DataFrame, features: list[str]) -> None:
 
 
 def main() -> int:
-    """Create histograms for each subject."""
+    """Main entry point for the script. Loads the dataset, parses command-line arguments, and generates the corresponding graphical display."""
     df = load_csv(DATASET)
     if df is None:
         return 1

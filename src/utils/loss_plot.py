@@ -1,4 +1,4 @@
-"""TODO."""
+"""Module dedicated to displaying model performance charts.."""
 
 import matplotlib.pyplot as plt
 

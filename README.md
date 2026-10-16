@@ -44,6 +44,30 @@ Hyperparameters and optimizer can be selected with
 and `--seed`. The weights are written to `weights.csv` (one-vs-all) or
 `weights_softmax.csv` (`--softmax`), or to `--output <file>`.
 
+The features used for the training can be restricted with `--features`,
+which takes a comma-separated list of column names:
+
+```bash
+python3 src/logreg_train.py -f dataset_train.csv --features Astronomy,Herbology,Charms
+```
+
+By default every numeric column is used. The selected features are stored in
+the weights file, so the prediction automatically uses the same ones.
+
+### Predict
+
+Generate the predictions with the one-vs-all weights (default) or with the
+softmax weights:
+
+```bash
+python3 src/logreg_predict.py dataset_train.csv
+python3 src/logreg_predict.py dataset_train.csv --softmax
+```
+
+The predictions are written to `houses.csv`, or to `--output <file>`. The
+softmax prediction requires the weights to use the same features as the input
+file.
+
 ### With Nix
 
 [Nix](https://nixos.org/) is a tool of package management and system configuration to make reproducible, declarative and reliable systems.

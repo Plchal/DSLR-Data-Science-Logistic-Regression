@@ -1,4 +1,4 @@
-"""TODO."""
+"""Module initialization and export of mathematics and file handling components.."""
 
 from .file_handling import load_csv, write_csv
 from .mathematics import (

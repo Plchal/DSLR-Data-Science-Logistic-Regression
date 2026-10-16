@@ -1,4 +1,4 @@
-"""."""
+"""Script for the comparative evaluation of the logistic regression model."""
 
 import sys
 
@@ -42,7 +42,7 @@ def _make_sk() -> OneVsRestClassifier:
 
 
 def run_cv(features: list[str], model_name: str) -> None:
-    """TODO."""
+    """Performs cross-validation and displays comparative performance."""
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=4, random_state=0)  # type: ignore[no-untyped-call]
     ours, theirs, dummy = [], [], []
     for tr_idx, te_idx in cv.split(df, df["Hogwarts House"]):  # type: ignore[no-untyped-call]

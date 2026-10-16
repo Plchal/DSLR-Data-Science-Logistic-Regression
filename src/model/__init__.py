@@ -1,4 +1,4 @@
-"""TODO."""
+"""Module initialization and export of logistic regression components."""
 
 from .create_prediction_set import create_multiclass_prediction_set, create_prediction_set
 from .create_training_set import create_multiclass_training_set, create_training_set_dict

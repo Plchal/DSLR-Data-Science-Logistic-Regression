@@ -1,4 +1,4 @@
-"""TODO."""
+"""Script for displaying scatter plots to compare the characteristics of the dataset."""
 
 import argparse
 import sys
@@ -13,7 +13,7 @@ from utils.variable import COLS_TO_DROP, DATASET, HOUSE_COLORS
 
 
 def find_most_similarity_features(df: pd.DataFrame) -> list[str]:
-    """."""
+    """Identify and return the two features with the strongest correlation (in absolute value)."""
     cols_to_keep = df.drop(columns=COLS_TO_DROP).columns.tolist()
     number_of_features = 2
     if len(cols_to_keep) < number_of_features:
@@ -34,7 +34,7 @@ def find_most_similarity_features(df: pd.DataFrame) -> list[str]:
 
 
 def show_scatter_plot(df: pd.DataFrame, features: list[str]) -> None:
-    """TODO."""
+    """Displays a scatter plot matrix using matplotlib for the specified features."""
     n_features = len(features)
 
     fig, axes = plt.subplots(nrows=n_features, ncols=n_features, figsize=(20, 20))
@@ -86,7 +86,7 @@ def show_scatter_plot(df: pd.DataFrame, features: list[str]) -> None:
 
 
 def main() -> int:
-    """TODO."""
+    """Main entry point for the script. Loads the dataset, parses command-line arguments, and generates the corresponding graphical display."""
     df = load_csv(DATASET)
     if df is None:
         return 1
