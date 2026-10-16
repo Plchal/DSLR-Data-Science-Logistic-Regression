@@ -7,7 +7,7 @@ from typing import Generic, TypeVar
 import numpy as np
 from pandas import DataFrame
 
-from utils.variable import DEFAULT_BATCH_SIZE, EPSILON, Array1D, Array2D, ArrayIndex, Optimizer
+from utils.variable import DEFAULT_BATCH_SIZE, EPSILON, HOUSES, Array1D, Array2D, ArrayIndex, Optimizer
 
 T = TypeVar("T", bound=np.ndarray)
 
@@ -121,6 +121,19 @@ class PredictionSet:
     features: list[list[float]]
     mean: list[list[float]]
     std: list[list[float]]
+
+
+@dataclass
+class MulticlassPredictionSet:
+    """Dataclass used for the multiclass (softmax) prediction.
+
+    Args:
+        design_matrix (Array2D): Standardized features with the intercept column.
+        weights (Array2D): Weight matrix (one row per feature, one column per house).
+    """
+
+    design_matrix: Array2D
+    weights: Array2D
 
 
 def logistic_regression(training_set: TrainingSet, parameter: HyperParameter | None = None) -> TrainingResult[Array1D]:
@@ -294,3 +307,17 @@ def create_prediction(prediction_set: PredictionSet) -> list[float]:
         pred = _sigmoid(standard_feature @ weights)
         y_pred.append(float(pred))
     return y_pred
+
+
+def predict_softmax(prediction_set: MulticlassPredictionSet) -> list[str]:
+    """Predict the house of each observation with a softmax classifier.
+
+    Args:
+        prediction_set (MulticlassPredictionSet): Design matrix and weight matrix defined by the training.
+
+    Returns:
+        list[str]: Predicted house for each observation.
+    """
+    probabilities = _softmax(prediction_set.design_matrix @ prediction_set.weights)
+    indices = np.argmax(probabilities, axis=1)
+    return [HOUSES[index] for index in indices]
