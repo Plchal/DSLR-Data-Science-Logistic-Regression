@@ -18,6 +18,5 @@ BEST_FEATURES_FOR_TRAIN = ["Astronomy", "Herbology", "Defense Against the Dark A
 DEFAULT_BATCH_SIZE = 32
 EPSILON = 1e-12
 
-Array1D: TypeAlias = np.typing.NDArray[np.float64]
-Array2D: TypeAlias = np.typing.NDArray[np.float64]
+Matrix: TypeAlias = np.typing.NDArray[np.float64]
 ArrayIndex: TypeAlias = np.typing.NDArray[np.int64]

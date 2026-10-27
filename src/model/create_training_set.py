@@ -1,54 +1,68 @@
 """Function to create the training set dictionary."""
 
+from dataclasses import dataclass
 from typing import cast
 
 import numpy as np
 from pandas import DataFrame, Series
 
-from utils.variable import BETA0_NAME, HOUSES, Array1D, Array2D
+from utils.variable import BETA0_NAME, HOUSES, Matrix
 
-from .logistic_regression import MulticlassTrainingSet, TrainingSet
+from .dataclass import TrainingSet
 from .stats import get_stats
 
 
-def create_training_set_dict(df: DataFrame, features: list[str] | None = None) -> dict[str, TrainingSet] | None:
-    """Create the training set dictionary.
+@dataclass
+class DataSet:
+    """Dataclass used to create the training set.
 
     Args:
-        df (DataFrame): Data frame representing the data in the CSV file.
-        features (list[str] | None): Features to train on. Use every numeric column when None.
-
-    Returns:
-        dict[str, TrainingSet] | None: Dictionary of training set of each house or None on failed.
+        features_name (list[str]): Names of the feature columns (intercept included).
+        features (Matrix): 2D array containing the observations.
+        target_dict (dict[str, Matrix]): 2D bool array (student is part of the house, houses).
+        stats (DataFrame): Statistics related to the training set.
     """
-    prepared = _prepare_dataset(df, features)
-    if prepared is None:
-        return None
-    features_name, features_values, target_dict, stats = prepared
-    return _create_training_data(features_name, features_values, target_dict, stats)
+
+    features_name: list[str]
+    features: Matrix
+    target_dict: dict[str, Matrix]
+    stats: DataFrame
 
 
-def create_multiclass_training_set(df: DataFrame, features: list[str] | None = None) -> MulticlassTrainingSet | None:
+def create_multiclass_training_set(df: DataFrame, features: list[str]) -> TrainingSet | None:
     """Create the multiclass (softmax) training set.
 
     Args:
         df (DataFrame): Data frame representing the data in the CSV file.
-        features (list[str] | None): Features to train on. Use every numeric column when None.
+        features (list[str]): Features to train on.
 
     Returns:
-        MulticlassTrainingSet | None: Training set with the one-hot target or None on failed.
+        TrainingSet | None: Training set with the one-hot target or None on failed.
     """
-    prepared = _prepare_dataset(df, features)
-    if prepared is None:
+    dataset = _prepare_dataset(df, features)
+    if dataset is None:
         return None
-    features_name, features_values, target_dict, stats = prepared
-    one_hot = np.column_stack([target_dict[house] for house in HOUSES])
-    return MulticlassTrainingSet(features_name, features_values, one_hot, stats)
+    one_hot = np.column_stack([dataset.target_dict[house] for house in HOUSES])
+    return TrainingSet(dataset.features_name, dataset.features, one_hot, dataset.stats)
 
 
-def _prepare_dataset(
-    df: DataFrame, features: list[str] | None = None
-) -> tuple[list[str], Array2D, dict[str, Array1D], DataFrame] | None:
+def create_training_set_dict(df: DataFrame, features: list[str]) -> dict[str, TrainingSet] | None:
+    """Create the training set dictionary.
+
+    Args:
+        df (DataFrame): Data frame representing the data in the CSV file.
+        features (list[str]): Features to train on.
+
+    Returns:
+        dict[str, TrainingSet] | None: Dictionary of training set of each house or None on failed.
+    """
+    dataset = _prepare_dataset(df, features)
+    if dataset is None:
+        return None
+    return _create_training_data(dataset)
+
+
+def _prepare_dataset(df: DataFrame, features: list[str]) -> DataSet | None:
     house_col = "Hogwarts House"
     if not _is_valid_house_col(df, house_col):
         return None
@@ -59,7 +73,7 @@ def _prepare_dataset(
         return None
     stats = _create_stats(df_clean, features)
     features_name, features_values, target_dict = _get_features_and_target(df_clean, house_col, features)
-    return features_name, features_values, target_dict, stats
+    return DataSet(features_name, features_values, target_dict, stats)
 
 
 def _is_valid_house_col(df: DataFrame, house_col: str) -> bool:
@@ -97,7 +111,7 @@ def _has_data(df_clean: DataFrame) -> bool:
     return True
 
 
-def _is_valid_features(df_clean: DataFrame, features: list[str] | None) -> bool:
+def _is_valid_features(df_clean: DataFrame, features: list[str]) -> bool:
     if features is None:
         return True
     numeric = set(df_clean.select_dtypes(include=["number"]).columns)
@@ -111,25 +125,16 @@ def _is_valid_features(df_clean: DataFrame, features: list[str] | None) -> bool:
     return True
 
 
-def _selected_columns(df_clean: DataFrame, features: list[str] | None) -> list[str]:
-    if features is None:
-        return df_clean.select_dtypes(include=["number"]).columns.to_list()
-    return list(features)
-
-
-def _create_stats(df_clean: DataFrame, features: list[str] | None = None) -> DataFrame:
+def _create_stats(df_clean: DataFrame, features: list[str]) -> DataFrame:
     df_clean_stat = df_clean[_selected_columns(df_clean, features)]
     return get_stats(df_clean_stat)
 
 
 def _get_features_and_target(
-    df_clean: DataFrame, house_col: str, features: list[str] | None = None
-) -> tuple[list[str], Array2D, dict[str, Array1D]]:
+    df_clean: DataFrame, house_col: str, features: list[str]
+) -> tuple[list[str], Matrix, dict[str, Matrix]]:
     selected = _selected_columns(df_clean, features)
-    if features is None:
-        df_clean.dropna(inplace=True)
-    else:
-        df_clean.dropna(subset=selected, inplace=True)
+    df_clean.dropna(subset=selected, inplace=True)
     target_dict = _get_tagets(df_clean[house_col])
     features_clean = df_clean[selected]
     features_name = [BETA0_NAME, *features_clean.columns.to_list()]
@@ -137,17 +142,18 @@ def _get_features_and_target(
     return features_name, features_arr, target_dict
 
 
-def _get_tagets(house_col: Series) -> dict[str, Array1D]:
-    target_dict = {}
-    for house in HOUSES:
-        target_dict[house] = (house_col == house).astype(int).to_numpy()
-    return target_dict
+def _selected_columns(df_clean: DataFrame, features: list[str]) -> list[str]:
+    if features is None:
+        return df_clean.select_dtypes(include=["number"]).columns.to_list()
+    return features
 
 
-def _create_training_data(
-    features_name: list[str], features: Array2D, target_dict: dict[str, Array1D], stats: DataFrame
-) -> dict[str, TrainingSet]:
-    training_set_dict = {}
-    for house in HOUSES:
-        training_set_dict[house] = TrainingSet(features_name, features, target_dict[house], stats)
-    return training_set_dict
+def _get_tagets(house_col: Series) -> dict[str, Matrix]:
+    return {house: (house_col == house).astype(int).to_numpy() for house in HOUSES}
+
+
+def _create_training_data(dataset: DataSet) -> dict[str, TrainingSet]:
+    return {
+        house: TrainingSet(dataset.features_name, dataset.features, dataset.target_dict[house], dataset.stats)
+        for house in HOUSES
+    }

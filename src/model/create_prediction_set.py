@@ -4,44 +4,23 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame
 
-from utils.variable import BETA0_NAME, HOUSES, PREDICTION_FILE, WEIGHTS_FILE
+from utils.variable import BETA0_NAME, HOUSES
 
-from .logistic_regression import MulticlassPredictionSet, PredictionSet, _standard_score
-
-
-def create_prediction_set(weights: DataFrame, df: DataFrame) -> dict[str, PredictionSet] | None:
-    """Create the prediction set dictionary.
-
-    Args:
-        weights (DataFrame): Data frame representing the weights in the CSV file created by the training.
-        df (DataFrame): Data frame containing the data from the CSV file to be analyzed.
-
-    Returns:
-        dict[str, TrainingSet] | None: Dictionary of training set of each house or None on failed.
-    """
-    if not _parse_weights(weights):
-        return None
-    test_df = _clean_test_df(weights, df)
-    if test_df is None:
-        return None
-    if not _parse_test_df(test_df):
-        return None
-    return _create_prediction_data(weights, test_df)
+from .dataclass import PredictionSet
+from .logistic_regression import standard_score
 
 
-def create_multiclass_prediction_set(
-    weights: DataFrame, df: DataFrame, weights_name: str = WEIGHTS_FILE, data_name: str = PREDICTION_FILE
-) -> MulticlassPredictionSet | None:
-    """Create the multiclass (softmax) prediction set.
+def clean_data_frame(weights: DataFrame, df: DataFrame, weights_name: str, data_name: str) -> DataFrame | None:
+    """Validate and clean the weights and test data frames.
 
     Args:
-        weights (DataFrame): Data frame representing the weights in the CSV file created by the training.
-        df (DataFrame): Data frame containing the data from the CSV file to be analyzed.
-        weights_name (str): Name of the weights file (used in error messages).
-        data_name (str): Name of the data file (used in error messages).
+        weights (DataFrame): Data frame containing the trained weights.
+        df (DataFrame): Data frame containing the test data.
+        weights_name (str): Weights file name used in error messages.
+        data_name (str): Test data file name used in error messages.
 
     Returns:
-        MulticlassPredictionSet | None: Design matrix and weight matrix or None on failed.
+        DataFrame | None: The cleaned test data frame, or None if validation fails.
     """
     if not _parse_weights(weights, weights_name):
         return None
@@ -50,10 +29,10 @@ def create_multiclass_prediction_set(
         return None
     if not _parse_test_df(test_df, data_name):
         return None
-    return _build_multiclass_prediction_set(weights, test_df)
+    return test_df
 
 
-def _parse_weights(weights: DataFrame, file_name: str = WEIGHTS_FILE) -> bool:
+def _parse_weights(weights: DataFrame, file_name: str) -> bool:
     if weights.isnull().values.any():
         print("Null value in", file_name)
         return False
@@ -64,7 +43,7 @@ def _parse_weights(weights: DataFrame, file_name: str = WEIGHTS_FILE) -> bool:
     return _parse_weights_col(weights, file_name)
 
 
-def _parse_weights_col(weights: DataFrame, file_name: str = WEIGHTS_FILE) -> bool:
+def _parse_weights_col(weights: DataFrame, file_name: str) -> bool:
     nb_col = 7
 
     if weights.shape[1] != nb_col:
@@ -85,7 +64,7 @@ def _parse_weights_col(weights: DataFrame, file_name: str = WEIGHTS_FILE) -> boo
     return True
 
 
-def _clean_test_df(weights: DataFrame, df: DataFrame, data_name: str = PREDICTION_FILE) -> DataFrame | None:
+def _clean_test_df(weights: DataFrame, df: DataFrame, data_name: str) -> DataFrame | None:
     test_df = DataFrame()
     for feature in weights["feature"].values:
         if feature == BETA0_NAME:
@@ -97,7 +76,7 @@ def _clean_test_df(weights: DataFrame, df: DataFrame, data_name: str = PREDICTIO
     return test_df
 
 
-def _parse_test_df(test_df: DataFrame, data_name: str = PREDICTION_FILE) -> bool:
+def _parse_test_df(test_df: DataFrame, data_name: str) -> bool:
     min_row = 1
     if test_df.shape[0] < min_row:
         print("No row in", data_name)
@@ -111,59 +90,28 @@ def _parse_test_df(test_df: DataFrame, data_name: str = PREDICTION_FILE) -> bool
     return True
 
 
-def _build_multiclass_prediction_set(weights: DataFrame, test_df: DataFrame) -> MulticlassPredictionSet:
-    is_intercept = weights["feature"].eq(BETA0_NAME)
-    feature_rows = weights.loc[~is_intercept]
+def create_binary_prediction_set(weights_df: DataFrame, test_df: DataFrame) -> dict[str, PredictionSet]:
+    """Create a prediction set for each house using binary classification."""
+    return {house: _create_prediction_set(weights_df, test_df, house) for house in HOUSES}
 
-    means: np.ndarray = feature_rows["mean"].to_numpy(dtype=float)
-    stds: np.ndarray = feature_rows["std"].to_numpy(dtype=float)
+
+def create_multinomial_prediction_set(weights_df: DataFrame, test_df: DataFrame) -> PredictionSet:
+    """Create a prediction set for multi-class classification across all houses."""
+    return _create_prediction_set(weights_df, test_df, HOUSES)
+
+
+def _create_prediction_set(weights_df: DataFrame, test_df: DataFrame, house: str | list[str]) -> PredictionSet:
+    weight_matrix = weights_df[house].to_numpy(dtype=float)
+
+    i = weights_df[(weights_df.feature == BETA0_NAME)].index
+    weights = weights_df.drop(i)
+    means = weights["mean"].to_numpy(dtype=float)
+    stds = weights["std"].to_numpy(dtype=float)
 
     raw = test_df.to_numpy(dtype=float)
-    standardized = _standard_score(raw, means, stds)
+    standardized = standard_score(raw, means, stds)
     standardized = np.nan_to_num(standardized, nan=0.0)
 
     intercept_col = np.ones(raw.shape[0])
     design_matrix = np.column_stack([intercept_col, standardized])
-    weight_matrix: np.ndarray = weights[HOUSES].to_numpy(dtype=float)
-    return MulticlassPredictionSet(design_matrix, weight_matrix)
-
-
-def _create_prediction_data(weights_df: DataFrame, test_df: DataFrame) -> dict[str, PredictionSet] | None:
-    prediction_set_dict = {}
-    for house in HOUSES:
-        result = _create_prediction_house_data(weights_df, test_df, house)
-        if result is None:
-            return None
-        prediction_set_dict[house] = result
-    return prediction_set_dict
-
-
-def _create_prediction_house_data(weights_df: DataFrame, test_df: DataFrame, house: str) -> PredictionSet | None:
-    is_intercept = weights_df["feature"].eq(BETA0_NAME)  # Determine which row has the feature BETA0_NAME.
-    intercept_weights = weights_df.loc[is_intercept, house].tolist()  # Store this row.
-    feature_weights = weights_df.loc[~is_intercept]  # Store the other rows.
-
-    features = feature_weights["feature"].tolist()
-    means = feature_weights["mean"].tolist()
-    stds = feature_weights["std"].tolist()
-    weights = feature_weights[house].tolist()
-
-    scores_df = test_df[features]
-
-    list_features = []
-    mean_list = []
-    std_list = []
-    list_weights = []
-
-    for row in scores_df.itertuples(index=False, name=None):  # It's a tuple with all score of a row.
-        valid = [i for (i, score) in enumerate(row) if not pd.isna(score)]  # Store all index where a score is defined.
-        if not valid:  # If there are no valid values in the row.
-            print("No feature available for one prediction")
-            return None
-
-        list_features.append([row[i] for i in valid])
-        mean_list.append([means[i] for i in valid])
-        std_list.append([stds[i] for i in valid])
-        list_weights.append(intercept_weights + [weights[i] for i in valid])
-
-    return PredictionSet(list_weights, list_features, mean_list, std_list)
+    return PredictionSet(design_matrix, weight_matrix)

@@ -11,8 +11,9 @@ from sklearn.model_selection import RepeatedStratifiedKFold
 from sklearn.multiclass import OneVsRestClassifier
 
 sys.path.insert(0, "src")
-from model import TrainingSet, _build_design_matrix, _sigmoid, logistic_regression
-from utils.variable import HOUSES
+import model
+from model import BinaryLogisticRegression, PredictionSet, TrainingSet, standard_score
+from utils.variable import HOUSES, Matrix
 
 FEATURES = ["Astronomy", "Herbology", "Defense Against the Dark Arts", "Ancient Runes"]  # ou les 13
 df = pd.read_csv("dataset_train.csv")
@@ -27,13 +28,24 @@ def _preprocess(
     return tr, te, stats
 
 
+def _build_design_matrix(feature: Matrix, stats: pd.DataFrame) -> Matrix:
+    mean = stats.loc["mean"].values
+    std = stats.loc["std"].values
+    standardized = standard_score(feature, mean, std)
+    one_value_col = np.ones(feature.shape[0])
+    return np.column_stack([one_value_col, standardized])
+
+
 def _predict_ours(x_train: pd.DataFrame, x_test: pd.DataFrame, y_train: pd.Series, stats: pd.DataFrame) -> np.ndarray:
     proba = np.zeros((len(x_test), len(HOUSES)))
     for k, house in enumerate(HOUSES):
         target = (y_train == house).astype(float).to_numpy()
         ts = TrainingSet(list(x_train.columns), x_train.to_numpy(), target, stats)
-        weights = logistic_regression(ts).weights
-        proba[:, k] = _sigmoid(_build_design_matrix(x_test.to_numpy(), stats) @ weights)
+        logistic_regression = model.LogisticRegression(BinaryLogisticRegression())
+        weights = logistic_regression.train(ts).weights
+        prediction_set = PredictionSet(_build_design_matrix(x_test.to_numpy(), stats), weights)
+        prediction = logistic_regression.create_prediction(prediction_set)
+        proba[:, k] = prediction
     return np.array(HOUSES)[proba.argmax(1)]
 
 
