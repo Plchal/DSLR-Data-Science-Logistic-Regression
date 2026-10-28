@@ -142,7 +142,7 @@ def test_write_csv_success(tmp_path: Path) -> None:
             "duration": [50, 40, 45, 72, float("nan"), float("nan")],
         }
     )
-    result = write_csv(path.name, df)
+    result = write_csv(str(path), df)
     assert result
 
 
@@ -155,7 +155,7 @@ def test_write_csv_empty_path(capsys: CaptureFixture[str]) -> None:
             "duration": [50, 40, 45, 72, float("nan"), float("nan")],
         }
     )
-    result = write_csv(path, df)
+    result = write_csv(str(path), df)
     captured = capsys.readouterr()
     assert not result
     assert "AssertionError: Files is not a .csv.\n" in captured.out
@@ -170,7 +170,7 @@ def test_write_csv_bad_path(capsys: CaptureFixture[str]) -> None:
             "duration": [50, 40, 45, 72, float("nan"), float("nan")],
         }
     )
-    result = write_csv(path, df)
+    result = write_csv(str(path), df)
     captured = capsys.readouterr()
     assert not result
     assert "Exception: Cannot save file into a non-existent directory:" in captured.out
@@ -185,7 +185,7 @@ def test_write_csv_bad_extention(capsys: CaptureFixture[str]) -> None:
             "duration": [50, 40, 45, 72, float("nan"), float("nan")],
         }
     )
-    result = write_csv(path, df)
+    result = write_csv(str(path), df)
     captured = capsys.readouterr()
     assert not result
     assert "AssertionError: Files is not a .csv.\n" in captured.out
@@ -200,7 +200,7 @@ def test_write_csv_no_extention(capsys: CaptureFixture[str]) -> None:
             "duration": [50, 40, 45, 72, float("nan"), float("nan")],
         }
     )
-    result = write_csv(path, df)
+    result = write_csv(str(path), df)
     captured = capsys.readouterr()
     assert not result
     assert "AssertionError: Files is not a .csv.\n" in captured.out
