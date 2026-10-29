@@ -31,7 +31,7 @@ class HyperParameter:
     Args:
         alpha (float): Learning rate.
         iteration (int): Number of times the gradient descent will be applied.
-        optimizer (Optimizer): Optimisation algorithm ("batch", "sgd" or "minibatch").
+        optimizer (Optimizer): Optimisation algorithm ("none", "batch", "sgd" or "minibatch").
         batch_size (int): Batch size used when the optimizer is "minibatch".
         seed (int | None): Seed used to make stochastic optimizers reproducible.
         track_loss (bool): Whether to store the loss at each iteration.
@@ -41,7 +41,7 @@ class HyperParameter:
 
     alpha: float = 0.1
     iteration: int = 10000
-    optimizer: Optimizer = "batch"
+    optimizer: Optimizer = "none"
     batch_size: int = DEFAULT_BATCH_SIZE
     seed: int | None = None
     track_loss: bool = True

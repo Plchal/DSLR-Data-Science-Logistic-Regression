@@ -92,7 +92,7 @@ def _pars_args() -> argparse.Namespace:
     parser.add_argument("-f", "--file", type=str, help="Path of the file")
     parser.add_argument("--softmax", action="store_true", help="Train one softmax classifier instead of one-vs-all")
     parser.add_argument("--features", type=str, default=None, help="Comma-separated list of features to train on")
-    parser.add_argument("--optimizer", choices=list(get_args(Optimizer)), default="batch")
+    parser.add_argument("--optimizer", choices=list(get_args(Optimizer)), default="none")
     parser.add_argument("--alpha", type=float, default=0.1)
     parser.add_argument("--iteration", type=int, default=10000)
     parser.add_argument("--batch_size", type=int, default=DEFAULT_BATCH_SIZE)

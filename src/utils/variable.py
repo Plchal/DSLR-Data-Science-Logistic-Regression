@@ -13,7 +13,7 @@ WEIGHTS_SOFTMAX_FILE = "weights_softmax.csv"
 PREDICTION_FILE = "houses.csv"
 BETA0_NAME = "beta0"
 
-Optimizer: TypeAlias = Literal["batch", "sgd", "minibatch"]
+Optimizer: TypeAlias = Literal["none", "batch", "sgd", "minibatch"]
 BEST_FEATURES_FOR_TRAIN = ["Astronomy", "Herbology", "Defense Against the Dark Arts", "Ancient Runes"]
 DEFAULT_BATCH_SIZE = 32
 EPSILON = 1e-12
