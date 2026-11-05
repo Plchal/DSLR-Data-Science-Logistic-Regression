@@ -9,6 +9,7 @@ description = ""
 requires-python = ">=3.11"
 dependencies = [
     "argparse>=1.4.0",
+    "matplotlib>=3.11.2",
     "mypy>=2.4.0",
     "pandas>=3.0.6",
     "pytest>=9.1.1",
