@@ -32,11 +32,28 @@
 
 ### Build and run
 
+Syncing the environment:
+```bash
+uv sync
+```
+
+Display information for all numerical features of a dataset:
+```bash
+uv run src/describe.py <dataset_train.csv>
+```
+
+Visualizing data to detect defects or anomalies (of `dataset_train.csv` file):
+```bash
+uv run src/histogram.py 
+uv run src/scatter_plot.py
+uv run src/pair_plot.py
+```
+
 Train the one-vs-all classifiers (default) or a single softmax classifier:
 
 ```bash
-python3 src/logreg_train.py -f dataset_train.csv
-python3 src/logreg_train.py -f dataset_train.csv --softmax
+uv run src/logreg_train.py -f <dataset_train.csv>
+uv run src/logreg_train.py -f <dataset_train.csv> --softmax
 ```
 
 Hyperparameters and optimizer can be selected with
@@ -48,7 +65,7 @@ The features used for the training can be restricted with `--features`,
 which takes a comma-separated list of column names:
 
 ```bash
-python3 src/logreg_train.py -f dataset_train.csv --features Astronomy,Herbology,Charms
+uv run src/logreg_train.py -f <dataset_train.csv> --features Astronomy,Herbology,Charms
 ```
 
 By default every numeric column is used. The selected features are stored in
@@ -60,8 +77,8 @@ Generate the predictions with the one-vs-all weights (default) or with the
 softmax weights:
 
 ```bash
-python3 src/logreg_predict.py dataset_train.csv
-python3 src/logreg_predict.py dataset_train.csv --softmax
+uv run src/logreg_predict.py <dataset_train.csv>
+uv run src/logreg_predict.py <dataset_train.csv> --softmax
 ```
 
 The predictions are written to `houses.csv`, or to `--output <file>`. The
@@ -96,5 +113,27 @@ reports an error on a staged file. The `commit-msg` hook rejects the commit
 when the message does not follow the convention.
 
 ## Resources
+
+[Wikipedia - Logistic regression](https://en.wikipedia.org/wiki/Logistic_regression)
+
+[Wikipedia - Linear regression](https://en.wikipedia.org/wiki/Linear_regression)
+
+[Wikipedia - Gradient](https://en.wikipedia.org/wiki/Gradient)
+
+[Wikipedia - Gradient descent](https://en.wikipedia.org/wiki/Gradient_descent)
+
+[Wikipedia - Sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function)
+
+[Wikipedia - Stochastic gradient descent](https://en.wikipedia.org/wiki/Stochastic_gradient_descent)
+
+[Progresser en maths - Le gradient d’une fonction](https://progresser-en-maths.com/gradient-cours-et-applications-ml/)
+
+[Progresser en maths - La descente de gradient](https://progresser-en-maths.com/descente-de-gradient-cours-et-implementation/)
+
+[Progresser en maths - La fonction sigmoïde](https://progresser-en-maths.com/la-fonction-sigmoide-cours-et-exercices-corriges/)
+
+[Progresser en maths - La régression logistique](https://progresser-en-maths.com/la-regression-logistique-cours-complet-maths-et-implementation-python/)
+
+[Progresser en maths - La régression linéaire](https://progresser-en-maths.com/la-regression-lineaire-cours-complet-maths-et-implementation-python/)
 
 [Pair Plot](https://www.geeksforgeeks.org/python/pairplot-in-matplotlib/)
