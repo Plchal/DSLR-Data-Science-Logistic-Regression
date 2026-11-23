@@ -1,19 +1,19 @@
 """Script for the comparative evaluation of the logistic regression model."""
 
 import sys
+import time
 
 import numpy as np
 import pandas as pd
-from sklearn.dummy import DummyClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, log_loss
 from sklearn.model_selection import RepeatedStratifiedKFold
 from sklearn.multiclass import OneVsRestClassifier
 
 sys.path.insert(0, "src")
 import model
 from model import BinaryLogisticRegression, PredictionSet, TrainingSet, standard_score
-from utils.variable import HOUSES, Matrix
+from utils.variable import BETA0_NAME, EPSILON, HOUSES, Matrix
 
 FEATURES = ["Astronomy", "Herbology", "Defense Against the Dark Arts", "Ancient Runes"]  # ou les 13
 df = pd.read_csv("dataset_train.csv")
@@ -36,7 +36,7 @@ def _build_design_matrix(feature: Matrix, stats: pd.DataFrame) -> Matrix:
     return np.column_stack([one_value_col, standardized])
 
 
-def _predict_ours(x_train: pd.DataFrame, x_test: pd.DataFrame, y_train: pd.Series, stats: pd.DataFrame) -> np.ndarray:
+def _predict_ours_ovr(x_train: pd.DataFrame, x_test: pd.DataFrame, y_train: pd.Series, stats: pd.DataFrame) -> Matrix:
     proba = np.zeros((len(x_test), len(HOUSES)))
     for k, house in enumerate(HOUSES):
         target = (y_train == house).astype(float).to_numpy()
@@ -44,38 +44,101 @@ def _predict_ours(x_train: pd.DataFrame, x_test: pd.DataFrame, y_train: pd.Serie
         logistic_regression = model.LogisticRegression(BinaryLogisticRegression())
         weights = logistic_regression.train(ts).weights
         prediction_set = PredictionSet(_build_design_matrix(x_test.to_numpy(), stats), weights)
-        prediction = logistic_regression.create_prediction(prediction_set)
-        proba[:, k] = prediction
-    return np.array(HOUSES)[proba.argmax(1)]
+        proba[:, k] = logistic_regression.create_prediction(prediction_set)
+    return proba
 
 
-def _make_sk() -> OneVsRestClassifier:
-    return OneVsRestClassifier(LogisticRegression(C=1e6, max_iter=5000))  # type: ignore[no-untyped-call]
+def _predict_ours_softmax(
+    x_train: pd.DataFrame, x_test: pd.DataFrame, y_train: pd.Series, stats: pd.DataFrame
+) -> Matrix:
+    target = np.column_stack([(y_train == house).astype(float).to_numpy() for house in HOUSES])
+    ts = TrainingSet([BETA0_NAME, *x_train.columns], x_train.to_numpy(), target, stats)
+    logistic_regression = model.LogisticRegression(model.MultinomialLogisticRegression())
+    weights = logistic_regression.train(ts).weights
+    prediction_set = PredictionSet(_build_design_matrix(x_test.to_numpy(), stats), weights)
+    return logistic_regression.create_prediction(prediction_set)
+
+
+def _make_sk_ovr() -> OneVsRestClassifier:
+    return OneVsRestClassifier(LogisticRegression(C=np.inf, solver="lbfgs", max_iter=5000))  # type: ignore[no-untyped-call]
+
+
+def _make_sk_multinomial() -> LogisticRegression:
+    return LogisticRegression(C=np.inf, solver="lbfgs", max_iter=5000)  # type: ignore[no-untyped-call]
+
+
+def _align(proba: Matrix, classes: np.ndarray) -> Matrix:
+    return proba[:, [list(classes).index(house) for house in HOUSES]]
+
+
+def _normalize(proba: Matrix) -> Matrix:
+    clipped = np.clip(proba, EPSILON, 1.0)
+    return clipped / clipped.sum(axis=1, keepdims=True)
+
+
+def _evaluate(proba: Matrix, y_true: pd.Series) -> tuple[float, float]:
+    labels = np.array(HOUSES)[proba.argmax(1)]
+    order = [HOUSES.index(house) for house in sorted(HOUSES)]
+    return accuracy_score(y_true, labels), log_loss(y_true, _normalize(proba)[:, order])
+
+
+def _record(
+    results: dict[str, list[tuple[float, float, float]]], name: str, proba: Matrix, y_true: pd.Series, elapsed: float
+) -> None:
+    results[name].append((*_evaluate(proba, y_true), elapsed))
 
 
 def run_cv(features: list[str], model_name: str) -> None:
     """Performs cross-validation and displays comparative performance."""
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=4, random_state=0)  # type: ignore[no-untyped-call]
-    ours, theirs, dummy = [], [], []
+    results: dict[str, list[tuple[float, float, float]]] = {
+        "nôtre OvR": [],
+        "sklearn OvR": [],
+        "nôtre softmax": [],
+        "sklearn softmax": [],
+    }
     for tr_idx, te_idx in cv.split(df, df["Hogwarts House"]):  # type: ignore[no-untyped-call]
         train, test = df.iloc[tr_idx], df.iloc[te_idx]
         tr, te, stats = _preprocess(train, test, features)
         y_train = train["Hogwarts House"]
         y_test = test["Hogwarts House"]
-
-        ours.append(accuracy_score(y_test, _predict_ours(tr, te, y_train, stats)))
-
         xtr = _build_design_matrix(tr.to_numpy(), stats)
         xte = _build_design_matrix(te.to_numpy(), stats)
-        clf = _make_sk().fit(xtr, y_train)
-        theirs.append(accuracy_score(y_test, clf.predict(xte)))
 
-        dm = DummyClassifier(strategy="most_frequent").fit(xtr, y_train)  # type: ignore[no-untyped-call]
-        dummy.append(accuracy_score(y_test, dm.predict(xte)))
+        for name, predict in {
+            "nôtre OvR": _predict_ours_ovr,
+            "nôtre softmax": _predict_ours_softmax,
+        }.items():
+            start = time.perf_counter()
+            proba = predict(tr, te, y_train, stats)
+            _record(results, name, proba, y_test, time.perf_counter() - start)
+
+        start = time.perf_counter()
+        sk_ovr = _make_sk_ovr().fit(xtr, y_train)
+        elapsed_ovr = time.perf_counter() - start
+        _record(results, "sklearn OvR", _align(sk_ovr.predict_proba(xte), sk_ovr.classes_), y_test, elapsed_ovr)
+
+        start = time.perf_counter()
+        sk_softmax = _make_sk_multinomial().fit(xtr, y_train)
+        elapsed_softmax = time.perf_counter() - start
+        _record(
+            results,
+            "sklearn softmax",
+            _align(sk_softmax.predict_proba(xte), sk_softmax.classes_),
+            y_test,
+            elapsed_softmax,
+        )
 
     print(f"\n=== {model_name} ({len(features)} features) ===")
-    print(f"  nôtre LR (GD)     : {np.mean(ours) * 100:6.2f}% ± {np.std(ours) * 100:.2f}")
-    print(f"  sklearn LR        : {np.mean(theirs) * 100:6.2f}% ± {np.std(theirs) * 100:.2f}")
+    print(f"{'modèle':<18}{'accuracy':>18}{'log-loss':>12}{'temps (s)':>12}")
+    for name, values in results.items():
+        acc = np.array([v[0] for v in values])
+        loss = np.array([v[1] for v in values])
+        timings = np.array([v[2] for v in values])
+        print(
+            f"{name:<18}{np.mean(acc) * 100:8.2f}% ± {np.std(acc) * 100:5.2f}"
+            f"{np.mean(loss):12.4f}{np.mean(timings):12.3f}"
+        )
 
 
 if __name__ == "__main__":
