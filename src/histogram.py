@@ -8,19 +8,19 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from utils import load_csv
-from utils.variable import COLS_TO_DROP, DATASET, HOUSE_COLORS, HOUSES
+from utils.variable import COLS_TO_DROP, DATASET, HOUSE_COLORS
 
 
 def find_most_homogenous_feature(df: pd.DataFrame) -> str:
     """Find the most homogenous features in dataset base it on the average and normalization that are most similar across the 4 houses."""
-    dict_means = {}
-    dict_stds = {}
-    for house in HOUSES:
-        df_tmp = df[df["Hogwarts House"] == house].drop(columns=COLS_TO_DROP)
-        dict_means[house] = df_tmp.mean(numeric_only=True)
-        dict_stds[house] = df_tmp.std(numeric_only=True)
-    df_means = pd.DataFrame(dict_means).T
-    df_stds = pd.DataFrame(dict_stds).T
+    features = df.drop(columns=COLS_TO_DROP).select_dtypes(include="number")
+
+    features_norm = (features - features.mean()) / features.std()
+
+    grouped = features_norm.groupby(df["Hogwarts House"])
+    df_means = grouped.mean()
+    df_stds = grouped.std()
+
     var_means = df_means.var(ddof=0)
     var_stds = df_stds.var(ddof=0)
 
