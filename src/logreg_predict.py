@@ -37,7 +37,7 @@ def _binary_prediction(weights: DataFrame, test_df: DataFrame) -> list[str]:
 
 def _pars_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="A script that predicts the house of each observation.")
-    parser.add_argument("file", help="Path of the file")
+    parser.add_argument("-f", "--file", type=str, help="Path to the CSV file on which we will perform a prediction")
     parser.add_argument("--softmax", action="store_true", help="Use the softmax weights instead of one-vs-all")
     parser.add_argument("--output", type=str, default=PREDICTION_FILE, help="Output file")
     return parser.parse_args()
