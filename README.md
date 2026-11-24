@@ -286,7 +286,9 @@ Whole datasets are handled as vectors and matrices:
 $$
 Z(X) = X\beta + \beta_0
 $$
+
 with:
+
 $$
 X =
 \begin{pmatrix}
@@ -311,6 +313,7 @@ Shapes: $Z\ (n,1)$, $X\ (n,K)$, $\beta\ (K,1)$, $\beta_0$ scalar (broadcast).
 $$
 A(Z) = \frac{1}{1 + e^{-Z}}
 $$
+
 with $Z\ (n,1)$ and $A\ (n,1)$.
 
 Cost function:
@@ -346,6 +349,7 @@ $$
 \frac{\partial \mathcal{L}}{\partial \beta} &= \frac{1}{n} X^T (A - Y)
 \end{aligned}
 $$
+
 with shapes $(K,1)$, $(K,n)$ and $(n,1)$.
 
 $\beta_0$ and its gradient are scalars:
@@ -353,6 +357,7 @@ $\beta_0$ and its gradient are scalars:
 $$
 \frac{\partial \mathcal{L}}{\partial \beta_0} = \frac{1}{n} \sum (A - Y) = \frac{1}{n} \mathbf{1}^T (A - Y)
 $$
+
 with $A\ (n,1)$ and $Y\ (n,1)$.
 
 ##### Gradient descent
