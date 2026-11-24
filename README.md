@@ -1,6 +1,6 @@
 # DSLR: Data Science × Logistic Regression
 
-Built a machine learning classifier from scratch in Python: hand-coded data analysis, charts, and prediction model with over 98% accuracy.
+A machine learning classifier built from scratch in Python: hand-coded data analysis, charts, and a prediction model with over 98% accuracy.
 *This project has been created as part of the 42 curriculum by pchalmin and tle-floc.*
 
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue?logo=python&logoColor=white)](pyproject.toml)
@@ -10,10 +10,12 @@ Built a machine learning classifier from scratch in Python: hand-coded data anal
 ## Too Long; Didn't Read
 
 - **Problem:** Classify 1,600 students into 4 houses using 13 course grades (with missing values and redundant features).
-- **Built from scratch:** Summary statistics (`describe`), data standardization, and a one-vs-all logistic regression trained via gradient descent — using `pandas` only for CSV I/O and `matplotlib` for plotting.
-- **Result:** **98.11% accuracy** on the validation split, vs. a 25% random baseline (and within 0.5% of `scikit-learn`'s `LogisticRegression`).
+- **Built from scratch:** Summary statistics (`describe`), data standardization, and a one-vs-all logistic regression trained via gradient descent. `pandas` is only used for CSV I/O and grouping in the exploration scripts, and `matplotlib` for plotting.
+- **Result:** **98.11% accuracy** in cross-validation, vs. a 25% random baseline, on par with `scikit-learn`'s `LogisticRegression` (98.12%).
 
 ## Results
+
+Accuracy (%) over a stratified 5-fold cross-validation repeated 4 times (20 runs) on `dataset_train.csv`:
 
 | Model | Features | Accuracy (mean ± std) |
 | ----- | -------- | --------------------- |
@@ -30,7 +32,7 @@ uv run src/scikitlearn_compare.py
 ## Quick start
 Requirements: Python ≥ 3.11 and [uv](https://docs.astral.sh/uv/).
 
-Datasets: `dataset_train.csv` and `dataset_test.csv`
+Datasets: place `dataset_train.csv` and `dataset_test.csv` (provided with the 42 subject) at the root of the repository; the scripts read them from the current directory.
 
 ```bash
 uv sync
@@ -41,7 +43,7 @@ uv run src/logreg_train.py -f dataset_train.csv
 ```
 
 ```bash
-uv run src/logreg_predict.py dataset_test.csv
+uv run src/logreg_predict.py -f dataset_test.csv
 ```
 
 The predictions are written to `houses.csv`.
@@ -56,39 +58,40 @@ dataset_test.csv ──► same features, same mean/std ────────
 
 | Path | Role |
 | ---- | ---- |
-| `src/describe.py` | Implement the `describe` function  |
-| `src/histogram.py`, `src/scatter_plot.py`, `src/pair_plot.py` | Analyze the data and visualize it to answer the questions in the topic. |
-| `src/logreg_train.py`, `src/logreg_predict.py` | Start the train or the predict with the desired parameters |
-| `src/model/` | Function for our model |
-| `src/utils/` | All utility functions for the project |
-| `src/scikitlearn_compare.py` | Compare our project to the machine learning library function |
-| `tests/` | Testing Our Code  |
+| `src/describe.py` | Hand-coded equivalent of pandas' `describe` |
+| `src/histogram.py`, `src/scatter_plot.py`, `src/pair_plot.py` | Explore and visualize the data to answer the questions of the subject |
+| `src/logreg_train.py`, `src/logreg_predict.py` | Run the training or the prediction with the desired parameters |
+| `src/model/` | Logistic regression model (binary and multinomial) |
+| `src/utils/` | Utility functions shared across the project |
+| `src/scikitlearn_compare.py` | Compare our model with scikit-learn's `LogisticRegression` |
+| `tests/` | Unit tests |
 
 ## Data exploration
 
 ### Which course has a homogeneous score distribution between the four houses?
 
-**Visual Answer:**
-A substance is homogeneous when the distribution of its properties is the same regardless of the House. Like this pictures:
+**Visual answer:**
+A course is homogeneous when its score distribution is the same whatever the house, as in this histogram:
 
 ![Histogram](./pictures/homogenous.png)
 
-**Maths Answer:**
-Calculation of a homogeneity score defined as variance plus the standard deviation. The smaller this score, the more homogeneous the subject is.
+**Maths answer:**
+Each course is standardized (z-score), then we compute the mean and the standard deviation of each house. The homogeneity score is the variance of the four means plus the variance of the four standard deviations. The lower the score, the more homogeneous the course.
 
 ### Which two features are similar?
-**Visual Answer:**
-The closer the scatter plot forms a line, the greater the similarity between the two subjects.
+**Visual answer:**
+The closer the scatter plot is to a straight line, the more similar the two courses.
 
-![Scater_plot](./pictures/similar.png)
+![Scatter plot](./pictures/similar.png)
 
-**Maths Answer:**
-Using the ***Pearson correlation coefficient*** to determine the similarity between two subjects.
+**Maths answer:**
+We use the ***Pearson correlation coefficient*** to measure the similarity between two courses.
 
 ### Which features are used for the logistic regression, and why?
-**Visual Answer:**
-When selecting features, we will choose the clusters that form four distinct groups of houses:
-![Pair_plot](./pictures/wich_features.png)
+**Visual answer:**
+We select the features whose scatter plots split the students into four distinct groups, one per house:
+
+![Pair plot](./pictures/which_features.png)
 
 ## Design decisions
 
@@ -105,7 +108,7 @@ When selecting features, we will choose the clusters that form four distinct gro
 | Early stopping on the loss | TODO | TODO |
 | 4 features by default instead of all 13 | TODO | TODO |
 
-## What We learned
+## What we learned
 
 ### Maths and machine learning
 
@@ -118,157 +121,158 @@ It has two phases:
 - **Training**: fit the parameters on known observations to separate classes 0 and 1 while minimizing the error.
 - **Prediction**: classify unseen observations; the model no longer changes.
 
-##### Sigmoid function
-
-$$
-f(x) = \frac{1}{1 + e^{-x}}
-$$
-
-##### Activation function
+##### Neuron (linear combination)
 
 Like the perceptron, logistic regression uses a neuron computing:
 $$
-z(x) = x\beta + θ
+z(x) = x\beta + \theta
 $$
-where $x$ is the observation row vector, $\beta$ the weight column vector, and $θ$ the bias.
+where $x$ is the observation row vector, $\beta$ the weight column vector, and $\theta$ the bias.
 
-The sigmoid activation $a$ maps $z$ to a probability of belonging to class 1, approaching 0 or 1 away from the decision boundary.
+##### Sigmoid activation
+
+$$
+a(z) = \frac{1}{1 + e^{-z}}
+$$
+
+The sigmoid activation $a$ maps $z$ to the probability of belonging to class 1. It approaches 0 or 1 as the observation moves away from the decision boundary ($z = 0$).
 
 ##### Bernoulli distribution
 
 $$
-\begin{align}
+\begin{aligned}
 P(Y = 1) &= a(z) \\
 P(Y = 0) &= 1 - a(z)
-\end{align}
+\end{aligned}
 $$
 
 So:
 $$
-P(Y = y) = a(z)^y * (1 - a(z))^{1- y}
+P(Y = y) = a(z)^y \cdot (1 - a(z))^{1 - y}
 $$
-with $y = \{0,\ 1\}$.
+with $y \in \{0, 1\}$.
 
 ##### Likelihood
 
-Likelihood measures how well predictions agree with the true labels: predicting class 1 with 90% probability on a $Y=1$ example gives 0.9 likelihood for that example. We multiply the probabilities rather than averaging them, so wrong predictions penalize the whole model:
+The likelihood measures how well the predictions agree with the true labels: predicting class 1 with a 90% probability on a $Y = 1$ example gives a likelihood of 0.9 for that example. Assuming the examples are independent, the likelihood of the whole dataset is the product of the individual probabilities:
 
 $$
 L = \prod_{i=1}^n P(Y = y_i)
 $$
 
-Since probabilities follow a Bernoulli distribution:
+Since the probabilities follow a Bernoulli distribution:
 
 $$
-L = \prod_{i=1}^n a_i^{y_i}  (1 - a_i)^{1 - y_i}
+L = \prod_{i=1}^n a_i^{y_i} (1 - a_i)^{1 - y_i}
 $$
 
-A product of many probabilities tends to 0, so we seek the maximum likelihood rather than 100%. Numerical underflow on large datasets is avoided by taking the natural log — monotonic, hence order-preserving — which also simplifies differentiation:
+The product of many probabilities quickly tends to 0, so we only seek to maximize it. To avoid numerical underflow on large datasets, we take the natural log: it is monotonic, hence preserves the maximum, and it also simplifies the differentiation:
 
 $$
-\begin{align}
-ln(L) &= ln\left(\prod_{i=1}^n a_i^{y_i}  (1 - a_i)^{1 - y_i}\right) \\
-ln(L) &= \sum_{i=1}^n ln\left(a_i^{y_i}  (1 - a_i)^{1 - y_i}\right) \\
-ln(L) &= \sum_{i=1}^n ln\left(a_i^{y_i} \right) + ln\left((1 - a_i)^{1 - y_i}\right) \\
-ln(L) &= \sum_{i=1}^n y_i * ln(a_i) + (1 - y_i) * ln(1 - a_i) \\
-\end{align}
+\begin{aligned}
+\ln(L) &= \ln\left(\prod_{i=1}^n a_i^{y_i} (1 - a_i)^{1 - y_i}\right) \\
+\ln(L) &= \sum_{i=1}^n \ln\left(a_i^{y_i} (1 - a_i)^{1 - y_i}\right) \\
+\ln(L) &= \sum_{i=1}^n \ln\left(a_i^{y_i}\right) + \ln\left((1 - a_i)^{1 - y_i}\right) \\
+\ln(L) &= \sum_{i=1}^n y_i \ln(a_i) + (1 - y_i) \ln(1 - a_i)
+\end{aligned}
 $$
 
-##### Cost function and Log Loss
+##### Cost function and log loss
 
-Maximizing likelihood is equivalent to minimizing error, i.e. minimizing its negative:
-
-$$
--ln(L) = -\sum_{i=1}^n y_i * ln(a_i) + (1 - y_i) * ln(1 - a_i)
-$$
-
-Normalizing by $n$ gives Log Loss:
+Maximizing the log-likelihood is equivalent to minimizing its negative, which we use as the cost:
 
 $$
-\mathcal{L} = - \frac{1}{n} \sum_{i=1}^n y_i * ln(a_i) + (1 - y_i) * ln(1 - a_i)
+-\ln(L) = -\sum_{i=1}^n y_i \ln(a_i) + (1 - y_i) \ln(1 - a_i)
 $$
 
-It is differentiable everywhere and convex (no local minima where gradient descent could get stuck). Its value is mainly a health check; training uses its derivative.
+Normalizing by $n$ gives the log loss:
+
+$$
+\mathcal{L} = - \frac{1}{n} \sum_{i=1}^n y_i \ln(a_i) + (1 - y_i) \ln(1 - a_i)
+$$
+
+It is differentiable and convex in $\beta$ and $\theta$: any local minimum is the global one, so gradient descent cannot get stuck. Its value is mainly a health check; the training uses its derivative.
 
 ##### Gradient
 
-The gradient of the cost gives the direction of steepest increase; only $β$ and $θ$ vary, while $X$ and $Y$ are fixed observations.
+The gradient of the cost gives the direction of steepest increase. Only $\beta$ and $\theta$ vary, while $X$ and $Y$ are fixed observations.
 
 $$
-\mathcal{L} = - \frac{1}{n} \sum_{i=1}^n y_i * ln(a_i) + (1 - y_i) * ln(1 - a_i)
+\mathcal{L} = - \frac{1}{n} \sum_{i=1}^n y_i \ln(a_i) + (1 - y_i) \ln(1 - a_i)
 $$
 $$
 a(z) = \frac{1}{1 + e^{-z}}
 $$
 $$
-z(x) = x\beta + θ
+z(x) = x\beta + \theta
 $$
 
+Derivative of the cost with respect to $a_i$:
+
 $$
-\begin{align}
-\text{ Soit } u &= 1 - a \\
-\text{ Soit } v &= ln(u) \\
-\frac{\partial v}{\partial a} &= \frac{\partial v}{\partial u} * \frac{\partial u}{\partial a} \\
-\frac{\partial v}{\partial a} &= \frac{1}{u} * (-1) \\
+\begin{aligned}
+\text{Let } u &= 1 - a \\
+\text{Let } v &= \ln(u) \\
+\frac{\partial v}{\partial a} &= \frac{\partial v}{\partial u} \cdot \frac{\partial u}{\partial a} \\
+\frac{\partial v}{\partial a} &= \frac{1}{u} \cdot (-1) \\
 \frac{\partial v}{\partial a} &= \frac{-1}{1 - a} \\
 \\
-\text{ Soit } w &= y * ln(a) + (1 - y) * ln(1 - a) \\
-\frac{\partial w}{\partial a} &= y *  \frac{1}{a} + (1 - y) * \frac{\partial v}{\partial a} \\
-\frac{\partial w}{\partial a} &= \frac{y}{a} + (1 - y) * \frac{-1}{1 - a} \\
+\text{Let } w &= y \ln(a) + (1 - y) \ln(1 - a) \\
+\frac{\partial w}{\partial a} &= y \cdot \frac{1}{a} + (1 - y) \cdot \frac{\partial v}{\partial a} \\
+\frac{\partial w}{\partial a} &= \frac{y}{a} + (1 - y) \cdot \frac{-1}{1 - a} \\
 \frac{\partial w}{\partial a} &= \frac{y}{a} + \frac{y - 1}{1 - a} \\
 \\
-\frac{\partial \mathcal{L}}{\partial a} &= - \frac{1}{n} \sum_{i=1}^n \frac{\partial w_i}{\partial a_i} \\
-\frac{\partial \mathcal{L}}{\partial a} &= - \frac{1}{n} \sum_{i=1}^n \frac{y_i}{a_i} + \frac{y_i - 1}{1 - a_i} \\
-\end{align}
+\frac{\partial \mathcal{L}}{\partial a_i} &= - \frac{1}{n} \left(\frac{y_i}{a_i} + \frac{y_i - 1}{1 - a_i}\right)
+\end{aligned}
 $$
 
+Derivative of the sigmoid:
+
 $$
-\begin{align}
-\text{ Soit } u &= -z \\
-\text{ Soit } v &= 1 + e^u \\
-\frac{\partial a}{\partial z} &= \frac{-1}{v^2} * e^u * (-1) \\
-\frac{\partial a}{\partial z} &= \frac{1}{v^2} * (1 + e^u - 1) \\
-\frac{\partial a}{\partial z} &= \frac{1}{v^2} * (v - 1) \\
-\frac{\partial a}{\partial z} &= \frac{1}{v} * \frac{v - 1}{v} \\
+\begin{aligned}
+\text{Let } u &= -z \\
+\text{Let } v &= 1 + e^u \\
+\frac{\partial a}{\partial z} &= \frac{-1}{v^2} \cdot e^u \cdot (-1) \\
+\frac{\partial a}{\partial z} &= \frac{1}{v^2} \cdot (1 + e^u - 1) \\
+\frac{\partial a}{\partial z} &= \frac{1}{v^2} \cdot (v - 1) \\
+\frac{\partial a}{\partial z} &= \frac{1}{v} \cdot \frac{v - 1}{v} \\
 \frac{\partial a}{\partial z} &= a \left(\frac{v}{v} - \frac{1}{v}\right) \\
-\frac{\partial a}{\partial z} &= a (1 - a) \\
-\end{align}
+\frac{\partial a}{\partial z} &= a (1 - a)
+\end{aligned}
+$$
+
+Derivative of the neuron, where $x_{ij}$ is the value of feature $j$ for observation $i$:
+
+$$
+\frac{\partial z_i}{\partial \beta_j} = x_{ij}
+$$
+
+Gradient with respect to $\beta_j$ (chain rule, summed over the observations):
+
+$$
+\begin{aligned}
+\frac{\partial \mathcal{L}}{\partial \beta_j} &= \sum_{i=1}^n \frac{\partial \mathcal{L}}{\partial a_i} \cdot \frac{\partial a_i}{\partial z_i} \cdot \frac{\partial z_i}{\partial \beta_j} \\
+\frac{\partial \mathcal{L}}{\partial \beta_j} &= - \frac{1}{n} \sum_{i=1}^n \left(\frac{y_i}{a_i} + \frac{y_i - 1}{1 - a_i}\right) \cdot a_i (1 - a_i) \cdot x_{ij} \\
+\frac{\partial \mathcal{L}}{\partial \beta_j} &= - \frac{1}{n} \sum_{i=1}^n \left(\frac{y_i a_i (1 - a_i)}{a_i} + \frac{(y_i - 1) a_i (1 - a_i)}{1 - a_i}\right) \cdot x_{ij} \\
+\frac{\partial \mathcal{L}}{\partial \beta_j} &= - \frac{1}{n} \sum_{i=1}^n \left[y_i (1 - a_i) + (y_i - 1) a_i\right] \cdot x_{ij} \\
+\frac{\partial \mathcal{L}}{\partial \beta_j} &= - \frac{1}{n} \sum_{i=1}^n \left[y_i - y_i a_i + y_i a_i - a_i\right] \cdot x_{ij} \\
+\frac{\partial \mathcal{L}}{\partial \beta_j} &= - \frac{1}{n} \sum_{i=1}^n (y_i - a_i) \cdot x_{ij} \\
+\frac{\partial \mathcal{L}}{\partial \beta_j} &= \frac{1}{n} \sum_{i=1}^n (a_i - y_i) \cdot x_{ij}
+\end{aligned}
+$$
+
+By the same derivation for $\theta$, with:
+
+$$
+\frac{\partial z_i}{\partial \theta} = 1
 $$
 
 $$
-\begin{align}
-\frac{\partial z}{\partial \beta_j} &= x_j \\
-\end{align}
-$$
-
-Gradient with respect to $\beta$:
-
-$$
-\begin{align}
-\frac{\partial \mathcal{L}}{\partial \beta_j} &= \frac{\partial \mathcal{L}}{\partial a} * \frac{\partial a}{\partial z} * \frac{\partial z}{\partial \beta_j} \\
-\frac{\partial \mathcal{L}}{\partial \beta_j} &= - \frac{1}{n} \sum_{i=1}^n \left(\frac{y_i}{a_i} + \frac{y_i - 1}{1 - a_i}\right) * a_i (1 - a_i) * x_j \\
-\frac{\partial \mathcal{L}}{\partial \beta_j} &= - \frac{1}{n} \sum_{i=1}^n \left(\frac{y_i a_i (1 - a_i)}{a_i} + \frac{(y_i - 1) a _i(1 - a_i)}{1 - a_i}\right) * x_j \\
-\frac{\partial \mathcal{L}}{\partial \beta_j} &= - \frac{1}{n} \sum_{i=1}^n [y_i  (1 - a_i) + (y_i - 1) * a _i] * x_j \\
-\frac{\partial \mathcal{L}}{\partial \beta_j} &= - \frac{1}{n} \sum_{i=1}^n [y_i - y_i a_i + y_i a _i - a _i] * x_j \\
-\frac{\partial \mathcal{L}}{\partial \beta_j} &= - \frac{1}{n} \sum_{i=1}^n (y_i - a _i) * x_j \\
-\frac{\partial \mathcal{L}}{\partial \beta_j} &= \frac{1}{n} \sum_{i=1}^n (a _i - y_i) * x_j \\
-\end{align}
-$$
-
-By the same derivation for $θ$:
-
-$$
-\begin{align}
-\frac{\partial z}{\partial \beta_j} &= 1 \\
-\end{align}
-$$
-
-$$
-\begin{align}
-\frac{\partial \mathcal{L}}{\partial θ} &= \frac{\partial \mathcal{L}}{\partial a} * \frac{\partial a}{\partial z} * \frac{\partial z}{\partial θ} \\
-\frac{\partial \mathcal{L}}{\partial θ} &= - \frac{1}{n} \sum_{i=1}^n \left(\frac{y_i}{a_i} + \frac{y_i - 1}{1 - a_i}\right) * a_i (1 - a_i) * 1 \\
-\frac{\partial \mathcal{L}}{\partial θ} &= \frac{1}{n} \sum_{i=1}^n (a _i - y_i) \\
-\end{align}
+\begin{aligned}
+\frac{\partial \mathcal{L}}{\partial \theta} &= \sum_{i=1}^n \frac{\partial \mathcal{L}}{\partial a_i} \cdot \frac{\partial a_i}{\partial z_i} \cdot \frac{\partial z_i}{\partial \theta} \\
+\frac{\partial \mathcal{L}}{\partial \theta} &= - \frac{1}{n} \sum_{i=1}^n \left(\frac{y_i}{a_i} + \frac{y_i - 1}{1 - a_i}\right) \cdot a_i (1 - a_i) \cdot 1 \\
+\frac{\partial \mathcal{L}}{\partial \theta} &= \frac{1}{n} \sum_{i=1}^n (a_i - y_i)
+\end{aligned}
 $$
 
 ##### Vectorization
@@ -276,29 +280,29 @@ $$
 Whole datasets are handled as vectors and matrices:
 
 $$
-Z(X) = X\beta + θ
+Z(X) = X\beta + \theta
 $$
 with:
 $$
 X =
 \begin{pmatrix}
-x_{11} & ... & x_{1K}\\
-x_{21} & ... & x_{2K}\\
-... & ... & ...\\
-x_{n1} & ... & x_{nK}\\
+x_{11} & \cdots & x_{1K} \\
+x_{21} & \cdots & x_{2K} \\
+\vdots & \ddots & \vdots \\
+x_{n1} & \cdots & x_{nK}
 \end{pmatrix} ;
-
+\quad
 \beta = \begin{pmatrix}
 \beta_{1} \\
 \beta_{2} \\
-... \\
-\beta_{K} \\
+\vdots \\
+\beta_{K}
 \end{pmatrix} ;
-
-θ\ \epsilon\ \mathbb{R}
+\quad
+\theta \in \mathbb{R}
 $$
 
-Shapes: $Z\ (n,1)$, $X\ (n,K)$, $\beta\ (K,1)$, $θ$ scalar (broadcast).
+Shapes: $Z\ (n,1)$, $X\ (n,K)$, $\beta\ (K,1)$, $\theta$ scalar (broadcast).
 
 $$
 A(Z) = \frac{1}{1 + e^{-Z}}
@@ -308,109 +312,122 @@ with $Z\ (n,1)$ and $A\ (n,1)$.
 Cost function:
 
 $$
-\begin{align}
-\mathcal{L} &= - \frac{1}{n} \sum_{i=1}^n \left[y_i * ln(a_i) + (1 - y_i) * ln(1 - a_i)\right] \\
-\mathcal{L} &= - \frac{1}{n} ([y_1 * ln(a_1) + ... + y_n * ln(a_n)] + [(1 - y_1) * ln(1 - a_1) + ... + (1 - y_n) * ln(1 - a_n)]) \\
-\mathcal{L} &= - \frac{1}{n} \sum \left[Y \odot ln(A) + (1 - Y) \odot ln(1 - A)\right]
-\end{align}
+\begin{aligned}
+\mathcal{L} &= - \frac{1}{n} \sum_{i=1}^n \left[y_i \ln(a_i) + (1 - y_i) \ln(1 - a_i)\right] \\
+\mathcal{L} &= - \frac{1}{n} \left([y_1 \ln(a_1) + \dots + y_n \ln(a_n)] + [(1 - y_1) \ln(1 - a_1) + \dots + (1 - y_n) \ln(1 - a_n)]\right) \\
+\mathcal{L} &= - \frac{1}{n} \sum \left[Y \odot \ln(A) + (1 - Y) \odot \ln(1 - A)\right]
+\end{aligned}
 $$
 
-$\odot$ is the Hadamard (element-wise) product; the sum reduces the $(n,1)$ vector to a scalar, equivalently written as:
+$\odot$ is the Hadamard (element-wise) product; the sum reduces the $(n,1)$ vector to a scalar, which can also be written as:
 
 $$
-\mathcal{L} = - \frac{1}{n} 1^T \left[Y \odot ln(A) + (1 - Y) \odot ln(1 - A)\right]
+\mathcal{L} = - \frac{1}{n} \mathbf{1}^T \left[Y \odot \ln(A) + (1 - Y) \odot \ln(1 - A)\right]
 $$
 
-The $\beta$ gradients form the Jacobian:
+The partial derivatives with respect to each $\beta_j$ form the gradient vector:
 
 $$
-\begin{align}
+\begin{aligned}
 \frac{\partial \mathcal{L}}{\partial \beta} &= \begin{pmatrix}
 \frac{\partial \mathcal{L}}{\partial \beta_1} \\
-... \\
-\frac{\partial \mathcal{L}}{\partial \beta_K} \\
-\end{pmatrix} \\ \\
-\frac{\partial \mathcal{L}}{\partial \beta} &= \begin{pmatrix}
-\frac{1}{n} \sum_{i=1}^n (a _i - y_i) * x_1 \\
-... \\
-\frac{1}{n} \sum_{i=1}^n (a _i - y_i) * x_K \\
-\end{pmatrix} \\ \\
-\frac{\partial \mathcal{L}}{\partial \beta} &= \frac{1}{n} \begin{pmatrix}
-\sum_{i=1}^n (a _i - y_i) * x_1 \\
-... \\
- \sum_{i=1}^n (a _i - y_i) * x_K \\
-\end{pmatrix} \\ \\
-\frac{\partial \mathcal{L}}{\partial \beta} &= \frac{1}{n} X^T \cdot (A - Y)
-\end{align}
+\vdots \\
+\frac{\partial \mathcal{L}}{\partial \beta_K}
+\end{pmatrix}
+= \frac{1}{n} \begin{pmatrix}
+\sum_{i=1}^n (a_i - y_i) \cdot x_{i1} \\
+\vdots \\
+\sum_{i=1}^n (a_i - y_i) \cdot x_{iK}
+\end{pmatrix} \\
+\frac{\partial \mathcal{L}}{\partial \beta} &= \frac{1}{n} X^T (A - Y)
+\end{aligned}
 $$
-with shapes $(K,1)$, $(K,n)$, $(n,1)$, $(n,1)$.
+with shapes $(K,1)$, $(K,n)$ and $(n,1)$.
 
-$θ$ and its gradient are scalars:
+$\theta$ and its gradient are scalars:
 
 $$
-\begin{align}
-\frac{\partial \mathcal{L}}{\partial θ} &= \frac{1}{n}  \sum (A - Y)
-\end{align}
+\frac{\partial \mathcal{L}}{\partial \theta} = \frac{1}{n} \sum (A - Y) = \frac{1}{n} \mathbf{1}^T (A - Y)
 $$
-with $A\ (n,1)$ and $Y\ (n,1)$. Equivalently:
-
-$$
-\begin{align}
-\frac{\partial \mathcal{L}}{\partial θ} &= \frac{1}{n}  1^T (A - Y)
-\end{align}
-$$
+with $A\ (n,1)$ and $Y\ (n,1)$.
 
 ##### Gradient descent
 
-Gradient descent moves in the opposite direction of the gradient to minimize the cost, iteratively. It is defined by a number of iterations and a learning rate $\alpha$; $β$ and $θ$ can start at zero or random values.
+Gradient descent iteratively moves in the opposite direction of the gradient to minimize the cost. It is defined by a number of iterations and a learning rate $\alpha$; $\beta$ and $\theta$ can start at zero or at random values.
 
 $$
-\begin{align}
-\beta' &= \beta - \alpha \frac{\partial \mathcal{L}}{\partial \beta} \\
-\beta' &= \beta - \alpha \frac{1}{n} X^T \cdot (A - Y)\\
-\end{align}
-$$
-
-$$
-\begin{align}
-θ' &= θ - \alpha \frac{\partial \mathcal{L}}{\partial θ} \\
-θ' &= θ - \alpha \frac{1}{n}  \sum (A - Y)\\
-\end{align}
+\begin{aligned}
+\beta' &= \beta - \alpha \frac{\partial \mathcal{L}}{\partial \beta} = \beta - \alpha \frac{1}{n} X^T (A - Y) \\
+\theta' &= \theta - \alpha \frac{\partial \mathcal{L}}{\partial \theta} = \theta - \alpha \frac{1}{n} \sum (A - Y)
+\end{aligned}
 $$
 
 ##### Learning rate
 
-$\alpha$ is usually set to 0.01. Too small: training needs many more iterations. Too large: the minimum is overshot and the error grows instead of decreasing.
+Common values of $\alpha$ are between 0.01 and 0.1; we use 0.1 by default. Too small: the training needs many more iterations. Too large: the minimum is overshot and the error grows instead of decreasing.
 
 ##### Alternative formulation
 
 $$
-\begin{align}
-z(x) &= x\beta + θ \\
-z(x) &= x_1 \beta_1 + ... + x_n \beta_n + θ \\
-z(x) &= x_1 \beta_1 + ... + x_n \beta_n + 1θ \\
-z(x) &= 1θ + x_1 \beta_1 + ... + x_n \beta_n \\
-z(x) &= (1, x) \cdot (θ, \beta) \\
-\end{align}
+\begin{aligned}
+z(x) &= x\beta + \theta \\
+z(x) &= x_1 \beta_1 + \dots + x_K \beta_K + \theta \\
+z(x) &= 1 \cdot \theta + x_1 \beta_1 + \dots + x_K \beta_K \\
+z(x) &= (1, x) \cdot (\theta, \beta)
+\end{aligned}
 $$
 
-Folding the bias into the weight vector and adding a 1 to $x$ gives:
+Folding the bias into the weight vector and adding a column of 1 to $X$ gives:
 
 $$
 X =
 \begin{pmatrix}
-1 & x_{11} & ... & x_{1K}\\
-1 & x_{21} & ... & x_{2K}\\
-1  & ... & ... & ...\\
-1 &x_{n1} & ... & x_{nK}\\
+1 & x_{11} & \cdots & x_{1K} \\
+1 & x_{21} & \cdots & x_{2K} \\
+\vdots & \vdots & \ddots & \vdots \\
+1 & x_{n1} & \cdots & x_{nK}
 \end{pmatrix} ;
+\quad
 \beta = \begin{pmatrix}
-θ \\
+\theta \\
 \beta_{1} \\
-\beta_{2} \\
-... \\
-\beta_{K} \\
+\vdots \\
+\beta_{K}
 \end{pmatrix}
+$$
+
+so that $Z = X\beta$ and a single update rule trains both the weights and the bias.
+
+#### Multiclass classification
+
+Logistic regression is binary, but there are $C = 4$ houses. Two strategies are implemented.
+
+##### One-vs-all
+
+We train $C$ binary classifiers: classifier $k$ learns "house $k$" (label 1) against "any other house" (label 0). For a new student, each classifier outputs a probability and we predict the house with the highest one:
+
+$$
+\hat{y} = \underset{k}{\arg\max}\ a_k(x)
+$$
+
+##### Softmax
+
+A single model computes one score per house, $z_k = x\beta_k + \theta_k$, and the softmax turns the $C$ scores into probabilities that sum to 1:
+
+$$
+a_k = \frac{e^{z_k}}{\sum_{c=1}^C e^{z_c}}
+$$
+
+The labels are one-hot encoded ($y_{ik} = 1$ if student $i$ belongs to house $k$, 0 otherwise) and the log loss generalizes to the cross-entropy:
+
+$$
+\mathcal{L} = - \frac{1}{n} \sum_{i=1}^n \sum_{k=1}^C y_{ik} \ln(a_{ik})
+$$
+
+With the bias folded into the weights, $B$ is now a $(K+1, C)$ matrix, $A$ and $Y$ are $(n, C)$ matrices, and the gradient keeps the same form as in the binary case:
+
+$$
+\frac{\partial \mathcal{L}}{\partial B} = \frac{1}{n} X^T (A - Y)
 $$
 
 ### Engineering
@@ -430,16 +447,17 @@ TODO
      Pour chaque limite : une phrase sur ce que tu ferais. -->
 - TODO
 
-### Bonus
-- More fields for describe [x]
-- How to answer at : Which Hogwarts course has a homogeneous score distribution between all four houses ? [x]
-- How to answer at : What are the two features that are similar ? [x]
-- How to answer at : From this visualization, which features are you going to use for your logistic regression ? [x]
-- Stochiastic Gradient Descent [x]
-- Mini Batch [x]
-- Soft - Max [x]
-- Early Stopping [x]
-- Plot cost [x]
+## Bonus
+
+- [x] More fields for `describe`
+- [x] Answer mathematically: which Hogwarts course has a homogeneous score distribution between all four houses?
+- [x] Answer mathematically: what are the two features that are similar?
+- [x] Answer mathematically: from this visualization, which features are you going to use for your logistic regression?
+- [x] Stochastic gradient descent
+- [x] Mini-batch gradient descent
+- [x] Softmax
+- [x] Early stopping
+- [x] Cost plot
 
 ## Usage reference
 
@@ -451,8 +469,8 @@ Display statistics for all numerical features of a dataset:
 uv run src/describe.py dataset_train.csv
 ```
 
-'''bash
-bash-5.3$ uv run src/describe.py dataset_train.csv 
+```
+$ uv run src/describe.py dataset_train.csv
               Index     Arithmancy  ...       Charms       Flying
 count    1600.00000    1566.000000  ...  1600.000000  1600.000000
 mean      799.50000   49634.570243  ...  -243.374409    21.958012
@@ -466,7 +484,9 @@ etendue  1599.00000  129326.000000  ...    35.620780   460.540000
 nan         0.00000      34.000000  ...     0.000000     0.000000
 
 [10 rows x 14 columns]
-'''
+```
+
+`etendue` is the range (max − min) and `nan` the number of missing values.
 
 </details>
 
@@ -504,7 +524,7 @@ uv run src/logreg_train.py -f dataset_train.csv --softmax
 | `-f`, `--file` | `dataset_train.csv` | Training dataset |
 | `--softmax` | off | Train one softmax classifier instead of one-vs-all |
 | `--features` | `Astronomy,Herbology,Defense Against the Dark Arts,Ancient Runes` | Comma-separated list of columns to train on |
-| `--optimizer` | `none` | `none`, `batch`, `sgd` or `minibatch` Trades smooth convergence for faster iterations and scalability to large datasets via configurable |
+| `--optimizer` | `none` | `none`, `batch`, `sgd` or `minibatch`. The stochastic variants trade a smooth convergence for faster iterations on large datasets |
 | `--alpha` | `0.1` | Learning rate |
 | `--iteration` | `10000` | Maximum number of passes over the dataset |
 | `--batch_size` | `32` | Batch size for `minibatch` |
@@ -558,14 +578,12 @@ uv run mypy src/
 uv run ruff check . && uv run ruff format --check .
 ```
 
-The same four checks run on every push and pull request (see [ci.yml](.github/workflows/ci.yml)).
-
-The tests (in the tests/ directory) cover 5 areas:
-- test_math.py — custom statistical functions: mean, median (even/odd), Q1/Q3 quartiles, standard deviation, Pearson's correlation.
-- test_stats.py — get_stats (describe): count, mean, std, min/max, quartiles, range, NaN; compared to pandas for single- and multi-column data, negative/decimal values, and duplicates.
-- test_file_handling.py — load_csv/write_csv: valid cases + errors (file extension, file not found, permissions, empty file, malformed columns, invalid path).
-- test_training_set.py — construction of training sets (one-vs-all and softmax): feature selection; unknown feature → explicit error.
-- test_prediction.py — softmax prediction: house with the maximum logit; imputing NaNs with the mean; missing feature or missing weight column → error.
+The tests (in the `tests/` directory) cover 5 areas:
+- `test_math.py`: custom statistical functions: mean, median (even/odd), Q1/Q3 quartiles, standard deviation, Pearson's correlation.
+- `test_stats.py`: `get_stats` (describe): count, mean, std, min/max, quartiles, range, NaN; compared to pandas for single- and multi-column data, negative/decimal values, and duplicates.
+- `test_file_handling.py`: `load_csv`/`write_csv`: valid cases and errors (file extension, file not found, permissions, empty file, malformed columns, invalid path).
+- `test_training_set.py`: construction of the training sets (one-vs-all and softmax): feature selection; unknown feature → explicit error.
+- `test_prediction.py`: softmax prediction: house with the maximum logit; NaNs imputed with the mean; missing feature or missing weight column → error.
 
 ### With Nix
 
@@ -609,23 +627,23 @@ if one of them fails. The `commit-msg` hook rejects the commit when the message 
 ## Resources
 
 **Maths**
-[Wikipedia - Logistic regression](https://en.wikipedia.org/wiki/Logistic_regression)
-[Wikipedia - Linear regression](https://en.wikipedia.org/wiki/Linear_regression)
-[Wikipedia - Gradient](https://en.wikipedia.org/wiki/Gradient)
-[Wikipedia - Gradient descent](https://en.wikipedia.org/wiki/Gradient_descent)
-[Wikipedia - Sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function)
-[Wikipedia - Stochastic gradient descent](https://en.wikipedia.org/wiki/Stochastic_gradient_descent)
-[Wikipedia - Pearson correlation coefficient](https://en.wikipedia.org/wiki/Pearson_correlation_coefficient)
+- [Wikipedia - Logistic regression](https://en.wikipedia.org/wiki/Logistic_regression)
+- [Wikipedia - Linear regression](https://en.wikipedia.org/wiki/Linear_regression)
+- [Wikipedia - Gradient](https://en.wikipedia.org/wiki/Gradient)
+- [Wikipedia - Gradient descent](https://en.wikipedia.org/wiki/Gradient_descent)
+- [Wikipedia - Sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function)
+- [Wikipedia - Stochastic gradient descent](https://en.wikipedia.org/wiki/Stochastic_gradient_descent)
+- [Wikipedia - Pearson correlation coefficient](https://en.wikipedia.org/wiki/Pearson_correlation_coefficient)
 
 **Courses (French)**
-[Progresser en maths - Le gradient d’une fonction](https://progresser-en-maths.com/gradient-cours-et-applications-ml/)
-[Progresser en maths - La descente de gradient](https://progresser-en-maths.com/descente-de-gradient-cours-et-implementation/)
-[Progresser en maths - La fonction sigmoïde](https://progresser-en-maths.com/la-fonction-sigmoide-cours-et-exercices-corriges/)
-[Progresser en maths - La régression logistique](https://progresser-en-maths.com/la-regression-logistique-cours-complet-maths-et-implementation-python/)
-[Progresser en maths - La régression linéaire](https://progresser-en-maths.com/la-regression-lineaire-cours-complet-maths-et-implementation-python/)
+- [Progresser en maths - Le gradient d’une fonction](https://progresser-en-maths.com/gradient-cours-et-applications-ml/)
+- [Progresser en maths - La descente de gradient](https://progresser-en-maths.com/descente-de-gradient-cours-et-implementation/)
+- [Progresser en maths - La fonction sigmoïde](https://progresser-en-maths.com/la-fonction-sigmoide-cours-et-exercices-corriges/)
+- [Progresser en maths - La régression logistique](https://progresser-en-maths.com/la-regression-logistique-cours-complet-maths-et-implementation-python/)
+- [Progresser en maths - La régression linéaire](https://progresser-en-maths.com/la-regression-lineaire-cours-complet-maths-et-implementation-python/)
 
 **Visualization**
-[GeeksfoGeeks - Pair Plot in Matplotlib](https://www.geeksforgeeks.org/python/pairplot-in-matplotlib/)
+- [GeeksforGeeks - Pair Plot in Matplotlib](https://www.geeksforgeeks.org/python/pairplot-in-matplotlib/)
 
 ## License
 
