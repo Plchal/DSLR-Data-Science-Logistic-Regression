@@ -68,9 +68,9 @@ def test_maximum(dataframe: pd.DataFrame) -> None:
     assert result == expected
 
 
-def test_etendue(dataframe: pd.DataFrame) -> None:
+def test_range(dataframe: pd.DataFrame) -> None:
     """Test minimum."""
-    result = get_stats(dataframe).loc["etendue", "values"]
+    result = get_stats(dataframe).loc["range", "values"]
     assert result == 8
 
 
@@ -128,13 +128,13 @@ def test_maximum_multiple_columns(multi_column_dataframe: pd.DataFrame) -> None:
     assert result.loc["max", "c"] == 10
 
 
-def test_etendue_multiple_columns(multi_column_dataframe: pd.DataFrame) -> None:
-    """Test etendue multiple columns."""
+def test_range_multiple_columns(multi_column_dataframe: pd.DataFrame) -> None:
+    """Test range multiple columns."""
     result = get_stats(multi_column_dataframe)
 
-    assert result.loc["etendue", "a"] == 8
-    assert result.loc["etendue", "b"] == 70
-    assert result.loc["etendue", "c"] == 20
+    assert result.loc["range", "a"] == 8
+    assert result.loc["range", "b"] == 70
+    assert result.loc["range", "c"] == 20
 
 
 def test_nb_nan_multiple_columns(multi_column_dataframe: pd.DataFrame) -> None:
@@ -184,7 +184,7 @@ def test_negative_and_decimal_values() -> None:
     assert result.loc["50%", "values"] == expected["50%"]
     assert result.loc["75%", "values"] == expected["75%"]
     assert result.loc["max", "values"] == expected["max"]
-    assert result.loc["etendue", "values"] == 19.4
+    assert result.loc["range", "values"] == 19.4
     assert result.loc["nan", "values"] == 3
 
 
@@ -203,5 +203,5 @@ def test_duplicate_values() -> None:
     assert result.loc["50%", "values"] == expected["50%"]
     assert result.loc["75%", "values"] == expected["75%"]
     assert result.loc["max", "values"] == expected["max"]
-    assert result.loc["etendue", "values"] == 19
+    assert result.loc["range", "values"] == 19
     assert result.loc["nan", "values"] == 0

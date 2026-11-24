@@ -135,7 +135,7 @@ def _get_features_and_target(
 ) -> tuple[list[str], Matrix, dict[str, Matrix]]:
     selected = _selected_columns(df_clean, features)
     df_clean.dropna(subset=selected, inplace=True)
-    target_dict = _get_tagets(df_clean[house_col])
+    target_dict = _get_targets(df_clean[house_col])
     features_clean = df_clean[selected]
     features_name = [BETA0_NAME, *features_clean.columns.to_list()]
     features_arr = features_clean.to_numpy()
@@ -148,7 +148,7 @@ def _selected_columns(df_clean: DataFrame, features: list[str]) -> list[str]:
     return features
 
 
-def _get_tagets(house_col: Series) -> dict[str, Matrix]:
+def _get_targets(house_col: Series) -> dict[str, Matrix]:
     return {house: (house_col == house).astype(int).to_numpy() for house in HOUSES}
 
 

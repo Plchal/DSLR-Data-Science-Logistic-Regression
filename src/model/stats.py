@@ -29,7 +29,7 @@ class Stats:
     median: float = 0
     third_quartile: float = 0
     max: float = 0
-    etendue: float = 0
+    range: float = 0
     nb_nan: int = 0
 
 
@@ -54,12 +54,12 @@ def get_stats(df: pd.DataFrame) -> pd.DataFrame:
             stats.median,
             stats.third_quartile,
             stats.max,
-            stats.etendue,
+            stats.range,
             stats.nb_nan,
         ]
     return pd.DataFrame(
         data,
-        index=["count", "mean", "std", "min", "25%", "50%", "75%", "max", "etendue", "nan"],
+        index=["count", "mean", "std", "min", "25%", "50%", "75%", "max", "range", "nan"],
     )
 
 
@@ -75,7 +75,7 @@ def _calculate_one_feature(feature: pd.Series) -> Stats:
     feature_sorted = feature_clean.sort_values().reset_index(drop=True)
     stats.min = feature_sorted.iloc[0]
     stats.max = feature_sorted.iloc[-1]
-    stats.etendue = stats.max - stats.min
+    stats.range = stats.max - stats.min
     stats.first_quartile = calculate_first_quartile(feature_sorted)
     stats.median = calculate_median(feature_sorted)
     stats.third_quartile = calculate_third_quartile(feature_sorted)

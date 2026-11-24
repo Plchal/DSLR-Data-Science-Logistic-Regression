@@ -53,7 +53,7 @@ def calculate_median(feature: pd.Series) -> float:
 
 
 def calculate_std(feature: pd.Series, mean: float) -> float:
-    """Standart Deviation Calculation with Bessel's correction."""
+    """Standard Deviation Calculation with Bessel's correction."""
     min_size: int = 2
 
     if feature.size < min_size:

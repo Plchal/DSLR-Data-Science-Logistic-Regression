@@ -36,7 +36,7 @@ class HyperParameter:
         seed (int | None): Seed used to make stochastic optimizers reproducible.
         track_loss (bool): Whether to store the loss at each iteration.
         delta_early_stop (float): The loss value at which training is considered complete and the steps are minimal.
-        watting (int): Number of iterations expected once the delta early stop is reached.
+        patience (int): Number of iterations expected once the delta early stop is reached.
     """
 
     alpha: float = 0.1
@@ -46,10 +46,10 @@ class HyperParameter:
     seed: int | None = None
     track_loss: bool = True
     delta_early_stop: float = 1e-6
-    watting: int = 1
+    patience: int = 1
 
     def __post_init__(self) -> None:
-        """Verifiy the init value."""
+        """Verify the init value."""
         if self.alpha <= 0:
             raise ValueError("alpha must be strictly positive")
         if self.iteration < 1:

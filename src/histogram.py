@@ -11,8 +11,8 @@ from utils import load_csv
 from utils.variable import COLS_TO_DROP, DATASET, HOUSE_COLORS
 
 
-def find_most_homogenous_feature(df: pd.DataFrame) -> str:
-    """Find the most homogenous features in dataset base it on the average and normalization that are most similar across the 4 houses."""
+def find_most_homogeneous_feature(df: pd.DataFrame) -> str:
+    """Find the most homogeneous features in dataset base it on the average and normalization that are most similar across the 4 houses."""
     features = df.drop(columns=COLS_TO_DROP).select_dtypes(include="number")
 
     features_norm = (features - features.mean()) / features.std()
@@ -24,8 +24,8 @@ def find_most_homogenous_feature(df: pd.DataFrame) -> str:
     var_means = df_means.var(ddof=0)
     var_stds = df_stds.var(ddof=0)
 
-    score_homogeneite = var_means + var_stds
-    return str(score_homogeneite.idxmin())
+    homogeneity_score = var_means + var_stds
+    return str(homogeneity_score.idxmin())
 
 
 def plot_histogram(df: pd.DataFrame, features: list[str]) -> None:
@@ -70,7 +70,7 @@ def main() -> int:
 
     parser.add_argument("-s", "--subject", type=str, help="Show the school subject histogram you choose.")
     parser.add_argument(
-        "-a", "--auto", action="store_true", help="Show the school subject histogram the most homogenous."
+        "-a", "--auto", action="store_true", help="Show the school subject histogram the most homogeneous."
     )
     parser.add_argument("-f", "--full", action="store_true", help="Show all of school subject histogram.")
     args = parser.parse_args()
@@ -80,7 +80,7 @@ def main() -> int:
         return 0
 
     if args.auto:
-        feature = [f"{find_most_homogenous_feature(df)}"]
+        feature = [f"{find_most_homogeneous_feature(df)}"]
         plot_histogram(df, feature)
         return 0
 

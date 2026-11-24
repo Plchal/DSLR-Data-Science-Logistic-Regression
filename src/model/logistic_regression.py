@@ -51,7 +51,7 @@ class LogisticRegression:
     ) -> TrainingResult:
         best_loss = float("inf")
         best_weights = weights.copy()
-        watting = 0
+        patience = 0
 
         rng = None if parameter.optimizer == "none" else np.random.default_rng(parameter.seed)
         batch_size = self._effective_batch_size(parameter, features.shape[0])
@@ -64,10 +64,10 @@ class LogisticRegression:
             if parameter.track_loss:
                 loss_history.append(loss)
             if loss < best_loss - parameter.delta_early_stop:
-                best_loss, best_weights, watting = loss, weights.copy(), 0
+                best_loss, best_weights, patience = loss, weights.copy(), 0
             else:
-                watting += 1
-                if parameter.watting > 0 and watting >= parameter.watting:
+                patience += 1
+                if parameter.patience > 0 and patience >= parameter.patience:
                     weights = best_weights
                     break
         return TrainingResult(weights, loss_history)
