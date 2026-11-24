@@ -9,9 +9,8 @@ description = ""
 requires-python = ">=3.11"
 dependencies = [
     "matplotlib>=3.11.2",
-    "mypy>=2.4.0",
+    "numpy>=2.4.6",
     "pandas>=3.0.6",
-    "pytest>=9.1.1",
 ]
 
 [tool.pytest.ini_options]
@@ -24,6 +23,8 @@ strict = true
 
 [dependency-groups]
 dev = [
+    "mypy>=2.4.0",
+    "pytest>=9.1.1",
     "ruff>=0.17.6",
     "scikit-learn>=1.9.1",
 ]
