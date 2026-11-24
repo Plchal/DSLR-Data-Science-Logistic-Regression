@@ -46,7 +46,7 @@ class HyperParameter:
     seed: int | None = None
     track_loss: bool = True
     delta_early_stop: float = 1e-6
-    patience: int = 1
+    patience: int = 10
 
     def __post_init__(self) -> None:
         """Verify the init value."""
