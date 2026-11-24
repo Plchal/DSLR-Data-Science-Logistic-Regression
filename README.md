@@ -149,9 +149,11 @@ P(Y = 0) &= 1 - a(z)
 $$
 
 So:
+
 $$
 P(Y = y) = a(z)^y \cdot (1 - a(z))^{1 - y}
 $$
+
 with $y \in \{0, 1\}$.
 
 ##### Likelihood
