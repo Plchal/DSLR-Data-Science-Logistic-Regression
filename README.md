@@ -637,6 +637,38 @@ if one of them fails. The `commit-msg` hook rejects the commit when the message 
 - [Wikipedia - Sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function)
 - [Wikipedia - Stochastic gradient descent](https://en.wikipedia.org/wiki/Stochastic_gradient_descent)
 - [Wikipedia - Pearson correlation coefficient](https://en.wikipedia.org/wiki/Pearson_correlation_coefficient)
+- [Wikipedia - Bernoulli distribution](https://en.wikipedia.org/wiki/Bernoulli_distribution)
+- [Wikipedia - Likelihood function](https://en.wikipedia.org/wiki/Likelihood_function)
+- [Wikipedia - Maximum likelihood estimation](https://en.wikipedia.org/wiki/Maximum_likelihood_estimation)
+- [Wikipedia - Cross-entropy](https://en.wikipedia.org/wiki/Cross-entropy)
+- [Wikipedia - Loss function](https://en.wikipedia.org/wiki/Loss_function)
+- [Wikipedia - Convex function](https://en.wikipedia.org/wiki/Convex_function)
+- [Wikipedia - Chain rule](https://en.wikipedia.org/wiki/Chain_rule)
+- [Wikipedia - Hadamard product](https://en.wikipedia.org/wiki/Hadamard_product_(matrices))
+- [Wikipedia - Arg max](https://en.wikipedia.org/wiki/Arg_max)
+- [Wikipedia - Arithmetic underflow](https://en.wikipedia.org/wiki/Arithmetic_underflow)
+
+**Statistics**
+- [Wikipedia - Standard score](https://en.wikipedia.org/wiki/Standard_score)
+- [Wikipedia - Variance](https://en.wikipedia.org/wiki/Variance)
+- [Wikipedia - Standard deviation](https://en.wikipedia.org/wiki/Standard_deviation)
+- [Wikipedia - Quartile](https://en.wikipedia.org/wiki/Quartile)
+- [Wikipedia - Imputation](https://en.wikipedia.org/wiki/Imputation_(statistics))
+- [Wikipedia - Histogram](https://en.wikipedia.org/wiki/Histogram)
+- [Wikipedia - Scatter plot](https://en.wikipedia.org/wiki/Scatter_plot)
+
+**Machine learning**
+- [Wikipedia - Supervised learning](https://en.wikipedia.org/wiki/Supervised_learning)
+- [Wikipedia - Statistical classification](https://en.wikipedia.org/wiki/Statistical_classification)
+- [Wikipedia - Perceptron](https://en.wikipedia.org/wiki/Perceptron)
+- [Wikipedia - Decision boundary](https://en.wikipedia.org/wiki/Decision_boundary)
+- [Wikipedia - Linear separability](https://en.wikipedia.org/wiki/Linear_separability)
+- [Wikipedia - Multiclass classification](https://en.wikipedia.org/wiki/Multiclass_classification)
+- [Wikipedia - Softmax function](https://en.wikipedia.org/wiki/Softmax_function)
+- [Wikipedia - One-hot](https://en.wikipedia.org/wiki/One-hot)
+- [Wikipedia - Learning rate](https://en.wikipedia.org/wiki/Learning_rate)
+- [Wikipedia - Early stopping](https://en.wikipedia.org/wiki/Early_stopping)
+- [Wikipedia - Cross-validation](https://en.wikipedia.org/wiki/Cross-validation_(statistics))
 
 **Courses (French)**
 - [Progresser en maths - Le gradient d’une fonction](https://progresser-en-maths.com/gradient-cours-et-applications-ml/)
