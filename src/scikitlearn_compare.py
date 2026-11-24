@@ -13,10 +13,10 @@ from sklearn.multiclass import OneVsRestClassifier
 sys.path.insert(0, "src")
 import model
 from model import BinaryLogisticRegression, PredictionSet, TrainingSet, standard_score
-from utils.variable import BETA0_NAME, EPSILON, HOUSES, Matrix
+from utils import load_csv
+from utils.variable import BEST_FEATURES_FOR_TRAIN, BETA0_NAME, DATASET, EPSILON, HOUSES, Matrix
 
-FEATURES = ["Astronomy", "Herbology", "Defense Against the Dark Arts", "Ancient Runes"]  # ou les 13
-df = pd.read_csv("dataset_train.csv")
+FEATURES = BEST_FEATURES_FOR_TRAIN
 
 
 def _preprocess(
@@ -88,13 +88,13 @@ def _record(
     results[name].append((*_evaluate(proba, y_true), elapsed))
 
 
-def run_cv(features: list[str], model_name: str) -> None:
+def run_cv(df: pd.DataFrame, features: list[str], model_name: str) -> None:
     """Performs cross-validation and displays comparative performance."""
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=4, random_state=0)  # type: ignore[no-untyped-call]
     results: dict[str, list[tuple[float, float, float]]] = {
-        "nôtre OvR": [],
+        "ours OvR": [],
         "sklearn OvR": [],
-        "nôtre softmax": [],
+        "ours softmax": [],
         "sklearn softmax": [],
     }
     for tr_idx, te_idx in cv.split(df, df["Hogwarts House"]):  # type: ignore[no-untyped-call]
@@ -106,8 +106,8 @@ def run_cv(features: list[str], model_name: str) -> None:
         xte = _build_design_matrix(te.to_numpy(), stats)
 
         for name, predict in {
-            "nôtre OvR": _predict_ours_ovr,
-            "nôtre softmax": _predict_ours_softmax,
+            "ours OvR": _predict_ours_ovr,
+            "ours softmax": _predict_ours_softmax,
         }.items():
             start = time.perf_counter()
             proba = predict(tr, te, y_train, stats)
@@ -130,7 +130,7 @@ def run_cv(features: list[str], model_name: str) -> None:
         )
 
     print(f"\n=== {model_name} ({len(features)} features) ===")
-    print(f"{'modèle':<18}{'accuracy':>18}{'log-loss':>12}{'temps (s)':>12}")
+    print(f"{'model':<18}{'accuracy':>18}{'log-loss':>12}{'time (s)':>12}")
     for name, values in results.items():
         acc = np.array([v[0] for v in values])
         loss = np.array([v[1] for v in values])
@@ -141,5 +141,14 @@ def run_cv(features: list[str], model_name: str) -> None:
         )
 
 
+def main() -> int:
+    """Load the training dataset and run the comparison."""
+    df = load_csv(DATASET)
+    if df is None:
+        return 1
+    run_cv(df, FEATURES, "F4 selection")
+    return 0
+
+
 if __name__ == "__main__":
-    run_cv(FEATURES, "sélection F4")
+    sys.exit(main())
