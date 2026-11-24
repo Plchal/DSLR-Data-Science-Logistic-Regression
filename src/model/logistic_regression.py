@@ -53,7 +53,7 @@ class LogisticRegression:
         best_weights = weights.copy()
         patience = 0
 
-        rng = None if parameter.optimizer == "none" else np.random.default_rng(parameter.seed)
+        rng = None if parameter.optimizer == "batch" else np.random.default_rng(parameter.seed)
         batch_size = self._effective_batch_size(parameter, features.shape[0])
         loss_history: list[float] = []
         for _ in range(parameter.iteration):
@@ -78,7 +78,7 @@ class LogisticRegression:
             yield indices[start : start + batch_size]
 
     def _effective_batch_size(self, parameter: HyperParameter, nb_sample: int) -> int:
-        if parameter.optimizer in {"none", "batch"}:
+        if parameter.optimizer == "batch":
             return nb_sample
         if parameter.optimizer == "sgd":
             return 1
