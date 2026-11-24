@@ -10,7 +10,7 @@ A machine learning classifier built from scratch in Python: hand-coded data anal
 ## Too Long; Didn't Read
 
 - **Problem:** Classify 1,600 students into 4 houses using 13 course grades (with missing values and redundant features).
-- **Built from scratch:** Summary statistics (`describe`), data standardization, and a one-vs-all logistic regression trained via gradient descent. `pandas` is only used for CSV I/O and grouping in the exploration scripts, and `matplotlib` for plotting.
+- **Built from scratch:** Summary statistics (`describe`), data standardization, and a logistic regression (one-vs-all or softmax) trained via gradient descent. `pandas` only stores and manipulates the tables (CSV I/O, missing-value filtering, grouping), never computes a statistic or a model step; `matplotlib` is used for plotting.
 - **Result:** **98.11% accuracy** in cross-validation, vs. a 25% random baseline, on par with `scikit-learn`'s `LogisticRegression` (98.12%).
 
 ## Results
@@ -23,6 +23,8 @@ Accuracy (%) over a stratified 5-fold cross-validation repeated 4 times (20 runs
 | Ours, softmax | 4 | 98.14 ± 0.82 |
 | scikit-learn `LogisticRegression`, one-vs-all | 4 | 98.12 ± 0.80 |
 | scikit-learn `LogisticRegression`, softmax | 4 | 98.14 ± 0.80 |
+
+To compare the models on equal terms, this script fills the missing values with the training-fold median for all four models. It therefore differs from `logreg_train.py`, which drops incomplete rows, and from `logreg_predict.py`, which fills them with the mean.
 
 Reproduce:
 ```bash
@@ -125,9 +127,9 @@ It has two phases:
 
 Like the perceptron, logistic regression uses a neuron computing:
 $$
-z(x) = x\beta + \theta
+z(x) = x\beta + \beta_0
 $$
-where $x$ is the observation row vector, $\beta$ the weight column vector, and $\theta$ the bias.
+where $x$ is the observation row vector, $\beta$ the weight column vector, and $\beta_0$ the bias (the intercept).
 
 ##### Sigmoid activation
 
@@ -166,14 +168,14 @@ $$
 L = \prod_{i=1}^n a_i^{y_i} (1 - a_i)^{1 - y_i}
 $$
 
-The product of many probabilities quickly tends to 0, so we only seek to maximize it. To avoid numerical underflow on large datasets, we take the natural log: it is monotonic, hence preserves the maximum, and it also simplifies the differentiation:
+Training seeks the parameters that maximize $L$. But a product of many probabilities quickly tends to 0 and underflows on large datasets, so we maximize its natural log instead: the log is monotonic, hence preserves the maximum, and it turns the product into a sum that is easier to differentiate:
 
 $$
 \begin{aligned}
 \ln(L) &= \ln\left(\prod_{i=1}^n a_i^{y_i} (1 - a_i)^{1 - y_i}\right) \\
 \ln(L) &= \sum_{i=1}^n \ln\left(a_i^{y_i} (1 - a_i)^{1 - y_i}\right) \\
 \ln(L) &= \sum_{i=1}^n \ln\left(a_i^{y_i}\right) + \ln\left((1 - a_i)^{1 - y_i}\right) \\
-\ln(L) &= \sum_{i=1}^n y_i \ln(a_i) + (1 - y_i) \ln(1 - a_i)
+\ln(L) &= \sum_{i=1}^n \left[y_i \ln(a_i) + (1 - y_i) \ln(1 - a_i)\right]
 \end{aligned}
 $$
 
@@ -182,29 +184,29 @@ $$
 Maximizing the log-likelihood is equivalent to minimizing its negative, which we use as the cost:
 
 $$
--\ln(L) = -\sum_{i=1}^n y_i \ln(a_i) + (1 - y_i) \ln(1 - a_i)
+-\ln(L) = -\sum_{i=1}^n \left[y_i \ln(a_i) + (1 - y_i) \ln(1 - a_i)\right]
 $$
 
 Normalizing by $n$ gives the log loss:
 
 $$
-\mathcal{L} = - \frac{1}{n} \sum_{i=1}^n y_i \ln(a_i) + (1 - y_i) \ln(1 - a_i)
+\mathcal{L} = - \frac{1}{n} \sum_{i=1}^n \left[y_i \ln(a_i) + (1 - y_i) \ln(1 - a_i)\right]
 $$
 
-It is differentiable and convex in $\beta$ and $\theta$: any local minimum is the global one, so gradient descent cannot get stuck. Its value is mainly a health check; the training uses its derivative.
+It is differentiable and convex in $\beta$ and $\beta_0$: any local minimum is the global one, so gradient descent cannot get stuck in a bad one. One caveat: when the classes are linearly separable, the cost keeps decreasing as the weights grow and has no finite minimum, which is one reason to stop the training early. Its value is mainly a health check; the training uses its derivative.
 
 ##### Gradient
 
-The gradient of the cost gives the direction of steepest increase. Only $\beta$ and $\theta$ vary, while $X$ and $Y$ are fixed observations.
+The gradient of the cost gives the direction of steepest increase. Only $\beta$ and $\beta_0$ vary, while $X$ and $Y$ are fixed observations.
 
 $$
-\mathcal{L} = - \frac{1}{n} \sum_{i=1}^n y_i \ln(a_i) + (1 - y_i) \ln(1 - a_i)
+\mathcal{L} = - \frac{1}{n} \sum_{i=1}^n \left[y_i \ln(a_i) + (1 - y_i) \ln(1 - a_i)\right]
 $$
 $$
 a(z) = \frac{1}{1 + e^{-z}}
 $$
 $$
-z(x) = x\beta + \theta
+z(x) = x\beta + \beta_0
 $$
 
 Derivative of the cost with respect to $a_i$:
@@ -261,17 +263,17 @@ $$
 \end{aligned}
 $$
 
-By the same derivation for $\theta$, with:
+By the same derivation for $\beta_0$, with:
 
 $$
-\frac{\partial z_i}{\partial \theta} = 1
+\frac{\partial z_i}{\partial \beta_0} = 1
 $$
 
 $$
 \begin{aligned}
-\frac{\partial \mathcal{L}}{\partial \theta} &= \sum_{i=1}^n \frac{\partial \mathcal{L}}{\partial a_i} \cdot \frac{\partial a_i}{\partial z_i} \cdot \frac{\partial z_i}{\partial \theta} \\
-\frac{\partial \mathcal{L}}{\partial \theta} &= - \frac{1}{n} \sum_{i=1}^n \left(\frac{y_i}{a_i} + \frac{y_i - 1}{1 - a_i}\right) \cdot a_i (1 - a_i) \cdot 1 \\
-\frac{\partial \mathcal{L}}{\partial \theta} &= \frac{1}{n} \sum_{i=1}^n (a_i - y_i)
+\frac{\partial \mathcal{L}}{\partial \beta_0} &= \sum_{i=1}^n \frac{\partial \mathcal{L}}{\partial a_i} \cdot \frac{\partial a_i}{\partial z_i} \cdot \frac{\partial z_i}{\partial \beta_0} \\
+\frac{\partial \mathcal{L}}{\partial \beta_0} &= - \frac{1}{n} \sum_{i=1}^n \left(\frac{y_i}{a_i} + \frac{y_i - 1}{1 - a_i}\right) \cdot a_i (1 - a_i) \cdot 1 \\
+\frac{\partial \mathcal{L}}{\partial \beta_0} &= \frac{1}{n} \sum_{i=1}^n (a_i - y_i)
 \end{aligned}
 $$
 
@@ -280,7 +282,7 @@ $$
 Whole datasets are handled as vectors and matrices:
 
 $$
-Z(X) = X\beta + \theta
+Z(X) = X\beta + \beta_0
 $$
 with:
 $$
@@ -299,10 +301,10 @@ x_{n1} & \cdots & x_{nK}
 \beta_{K}
 \end{pmatrix} ;
 \quad
-\theta \in \mathbb{R}
+\beta_0 \in \mathbb{R}
 $$
 
-Shapes: $Z\ (n,1)$, $X\ (n,K)$, $\beta\ (K,1)$, $\theta$ scalar (broadcast).
+Shapes: $Z\ (n,1)$, $X\ (n,K)$, $\beta\ (K,1)$, $\beta_0$ scalar (broadcast).
 
 $$
 A(Z) = \frac{1}{1 + e^{-Z}}
@@ -344,21 +346,21 @@ $$
 $$
 with shapes $(K,1)$, $(K,n)$ and $(n,1)$.
 
-$\theta$ and its gradient are scalars:
+$\beta_0$ and its gradient are scalars:
 
 $$
-\frac{\partial \mathcal{L}}{\partial \theta} = \frac{1}{n} \sum (A - Y) = \frac{1}{n} \mathbf{1}^T (A - Y)
+\frac{\partial \mathcal{L}}{\partial \beta_0} = \frac{1}{n} \sum (A - Y) = \frac{1}{n} \mathbf{1}^T (A - Y)
 $$
 with $A\ (n,1)$ and $Y\ (n,1)$.
 
 ##### Gradient descent
 
-Gradient descent iteratively moves in the opposite direction of the gradient to minimize the cost. It is defined by a number of iterations and a learning rate $\alpha$; $\beta$ and $\theta$ can start at zero or at random values.
+Gradient descent iteratively moves in the opposite direction of the gradient to minimize the cost. It is defined by a number of iterations and a learning rate $\alpha$; $\beta$ and $\beta_0$ can start at zero or at random values.
 
 $$
 \begin{aligned}
 \beta' &= \beta - \alpha \frac{\partial \mathcal{L}}{\partial \beta} = \beta - \alpha \frac{1}{n} X^T (A - Y) \\
-\theta' &= \theta - \alpha \frac{\partial \mathcal{L}}{\partial \theta} = \theta - \alpha \frac{1}{n} \sum (A - Y)
+\beta_0' &= \beta_0 - \alpha \frac{\partial \mathcal{L}}{\partial \beta_0} = \beta_0 - \alpha \frac{1}{n} \sum (A - Y)
 \end{aligned}
 $$
 
@@ -370,10 +372,10 @@ Common values of $\alpha$ are between 0.01 and 0.1; we use 0.1 by default. Too s
 
 $$
 \begin{aligned}
-z(x) &= x\beta + \theta \\
-z(x) &= x_1 \beta_1 + \dots + x_K \beta_K + \theta \\
-z(x) &= 1 \cdot \theta + x_1 \beta_1 + \dots + x_K \beta_K \\
-z(x) &= (1, x) \cdot (\theta, \beta)
+z(x) &= x\beta + \beta_0 \\
+z(x) &= x_1 \beta_1 + \dots + x_K \beta_K + \beta_0 \\
+z(x) &= 1 \cdot \beta_0 + x_1 \beta_1 + \dots + x_K \beta_K \\
+z(x) &= (1, x) \cdot (\beta_0, \beta)
 \end{aligned}
 $$
 
@@ -389,7 +391,7 @@ X =
 \end{pmatrix} ;
 \quad
 \beta = \begin{pmatrix}
-\theta \\
+\beta_0 \\
 \beta_{1} \\
 \vdots \\
 \beta_{K}
@@ -412,7 +414,7 @@ $$
 
 ##### Softmax
 
-A single model computes one score per house, $z_k = x\beta_k + \theta_k$, and the softmax turns the $C$ scores into probabilities that sum to 1:
+A single model computes one score per house, $z_k = x\beta_k + \beta_{0,k}$, and the softmax turns the $C$ scores into probabilities that sum to 1:
 
 $$
 a_k = \frac{e^{z_k}}{\sum_{c=1}^C e^{z_c}}
@@ -432,27 +434,24 @@ $$
 
 ### Engineering
 
-<!-- Qu'est-ce que mypy --strict, les tests et les hooks pre-commit t'ont fait attraper concrètement ?
-     Qu'est-ce que le travail à deux a changé (revue, conventions de commit, découpage) ? -->
-TODO
+`mypy --strict`, the tests, the Git hooks and the Nix development shell kept us rigorous throughout the project, and made sure we always had a working project.
 
-## Limitations and next steps
+- **Typing**: `mypy --strict` caught functions that could return `None` without the caller handling it, and mix-ups between pandas `Series`, NumPy arrays and plain floats.
+- **Tests**: our own statistics functions (mean, quartiles, standard deviation…) are tested against NumPy and pandas. The tests caught calculation errors, edge cases such as missing values and empty series, and regressions during refactors.
+- **Reference check**: `scikitlearn_compare.py` trains scikit-learn's logistic regression on the same data, and both models reach the same accuracy.
+- **Git hooks**: Ruff formats and lints the staged files before each commit, and commitlint rejects any message that does not follow Conventional Commits.
+- **Reproducibility**: `flake.lock` and `uv.lock` pin every tool and dependency. The flake has two shells: `default` to run the project, and `dev`, which adds Ruff and Node.js for the hooks.
 
-<!-- Nommer ses limites soi-même, c'est ce que fait un professionnel. Pistes issues de l'audit :
-     - pas de jeu de validation ni de métrique dans le pipeline principal ;
-     - dataset jouet, 4 classes bien séparées : le score élevé ne dit rien de la difficulté ;
-     - early stopping fragile avec sgd/minibatch ;
-     - Momentum et Adam non implémentés ;
-     - pas de test sur la descente de gradient elle-même.
-     Pour chaque limite : une phrase sur ce que tu ferais. -->
-- TODO
+Working as a pair let us each research topics on our own side, then pool our findings to learn as much as possible. We split the project into parts and worked on separate branches, and each of us reviewed the other's changes before merging them. The trickier parts we wrote together.
+
+What we would add next: a CI that runs mypy and the tests on every push. For now, they only run locally.
+
 
 ## Bonus
 
 - [x] More fields for `describe`
 - [x] Answer mathematically: which Hogwarts course has a homogeneous score distribution between all four houses?
 - [x] Answer mathematically: what are the two features that are similar?
-- [x] Answer mathematically: from this visualization, which features are you going to use for your logistic regression?
 - [x] Stochastic gradient descent
 - [x] Mini-batch gradient descent
 - [x] Softmax
@@ -480,13 +479,13 @@ min         0.00000  -24370.000000  ...  -261.048920  -181.470000
 50%       799.50000   49013.500000  ...  -244.867765    -2.515000
 75%      1199.25000   60811.250000  ...  -232.552305    50.560000
 max      1599.00000  104956.000000  ...  -225.428140   279.070000
-etendue  1599.00000  129326.000000  ...    35.620780   460.540000
+range  1599.00000  129326.000000  ...    35.620780   460.540000
 nan         0.00000      34.000000  ...     0.000000     0.000000
 
 [10 rows x 14 columns]
 ```
 
-`etendue` is the range (max − min) and `nan` the number of missing values.
+`range` is the range (max − min) and `nan` the number of missing values.
 
 </details>
 
@@ -574,8 +573,10 @@ uv run pytest
 uv run mypy src/
 ```
 
+Ruff is not a Python dependency of the project: it comes from the Nix dev shell (`nix develop .#dev`) or from a global install.
+
 ```bash
-uv run ruff check . && uv run ruff format --check .
+ruff check . && ruff format --check .
 ```
 
 The tests (in the `tests/` directory) cover 5 areas:
@@ -605,24 +606,15 @@ This repository uses [Conventional Commits](https://conventionalcommits.org),
 enforced by [Husky](https://typicode.github.io/husky/), [Commitizen](https://commitizen-tools.github.io/commitizen/) and [Commitlint](https://commitlint.js.org/).
 
 ```bash
-npm install
+npm ci
 ```
 
 ```bash
 npm run commit
 ```
 
-The `pre-commit` hook runs the type checker, the unit tests, the formatter and the linter, and rejects the commit
+When Python files are staged, the `pre-commit` hook runs the type checker, the unit tests, the formatter and the linter, and rejects the commit
 if one of them fails. The `commit-msg` hook rejects the commit when the message does not follow the convention.
-
-## Team and contributions
-
-
-| Author | Main contributions |
-| ------ | ------------------ |
-| pchalmin | TODO |
-| tle-floc | TODO |
-
 
 ## Resources
 
