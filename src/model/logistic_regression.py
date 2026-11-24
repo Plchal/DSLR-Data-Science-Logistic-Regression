@@ -73,7 +73,7 @@ class LogisticRegression:
         return TrainingResult(weights, loss_history)
 
     def _iter_batches(self, nb_sample: int, batch_size: int, rng: np.random.Generator | None) -> Iterator[ArrayIndex]:
-        indices = np.arange(batch_size) if rng is None else rng.permutation(nb_sample)
+        indices = np.arange(nb_sample) if rng is None else rng.permutation(nb_sample)
         for start in range(0, nb_sample, batch_size):
             yield indices[start : start + batch_size]
 
