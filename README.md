@@ -126,9 +126,11 @@ It has two phases:
 ##### Neuron (linear combination)
 
 Like the perceptron, logistic regression uses a neuron computing:
+
 $$
 z(x) = x\beta + \beta_0
 $$
+
 where $x$ is the observation row vector, $\beta$ the weight column vector, and $\beta_0$ the bias (the intercept).
 
 ##### Sigmoid activation
@@ -151,10 +153,12 @@ $$
 So:
 
 $$
-P(Y = y) = a(z)^y \cdot (1 - a(z))^{1 - y}
+\begin{aligned}
+P(Y = y) &= a(z)^y \cdot \left(1 - a(z)\right)^{1 - y} && \text{with } y \in \lbrace 0, 1 \rbrace
+\end{aligned}
 $$
 
-with $y \in \{0, 1\}$.
+
 
 ##### Likelihood
 
@@ -310,11 +314,13 @@ $$
 
 Shapes: $Z\ (n,1)$, $X\ (n,K)$, $\beta\ (K,1)$, $\beta_0$ scalar (broadcast).
 
+
 $$
-A(Z) = \frac{1}{1 + e^{-Z}}
+\begin{aligned}
+A(Z) = \frac{1}{1 + e^{-Z}} && \text{with } Z\ (n,1) \text{ and } A\ (n,1).
+\end{aligned}
 $$
 
-with $Z\ (n,1)$ and $A\ (n,1)$.
 
 Cost function:
 
@@ -346,19 +352,17 @@ $$
 \vdots \\
 \sum_{i=1}^n (a_i - y_i) \cdot x_{iK}
 \end{pmatrix} \\
-\frac{\partial \mathcal{L}}{\partial \beta} &= \frac{1}{n} X^T (A - Y)
+\frac{\partial \mathcal{L}}{\partial \beta} &= \frac{1}{n} X^T (A - Y) && \text{with shapes } (K,1),\ (K,n) \text{ and } (n,1).
 \end{aligned}
 $$
-
-with shapes $(K,1)$, $(K,n)$ and $(n,1)$.
 
 $\beta_0$ and its gradient are scalars:
 
 $$
-\frac{\partial \mathcal{L}}{\partial \beta_0} = \frac{1}{n} \sum (A - Y) = \frac{1}{n} \mathbf{1}^T (A - Y)
+\begin{aligned}
+\frac{\partial \mathcal{L}}{\partial \beta_0} &= \frac{1}{n} \sum_{i=1}^{n} (A_i - Y_i) = \frac{1}{n} \mathbf{1}^T (A - Y) && \text{with } A\ (n,1) \text{ and } Y\ (n,1).
+\end{aligned}
 $$
-
-with $A\ (n,1)$ and $Y\ (n,1)$.
 
 ##### Gradient descent
 
