@@ -92,8 +92,8 @@ def _clean_data(df: DataFrame, house_col: str) -> DataFrame:
 
     df_clean = df.copy()
     if index_col in df_clean.columns:
-        df_clean.drop(columns=[index_col], inplace=True)
-    df_clean.drop_duplicates(inplace=True)
+        df_clean = df_clean.drop(columns=[index_col])
+    df_clean = df_clean.drop_duplicates()
     df_clean = _remove_duplicate_same_house(df_clean, house_col)
     return df_clean
 
@@ -134,7 +134,7 @@ def _get_features_and_target(
     df_clean: DataFrame, house_col: str, features: list[str]
 ) -> tuple[list[str], Matrix, dict[str, Matrix]]:
     selected = _selected_columns(df_clean, features)
-    df_clean.dropna(subset=selected, inplace=True)
+    df_clean = df_clean.dropna(subset=selected)
     target_dict = _get_targets(df_clean[house_col])
     features_clean = df_clean[selected]
     features_name = [BETA0_NAME, *features_clean.columns.to_list()]
