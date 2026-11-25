@@ -31,6 +31,18 @@ Reproduce:
 uv run src/scikitlearn_compare.py
 ```
 
+## Contents
+- [Quick start](#quick_start)
+- [How it works](#how_it_works)
+- [Data exploration](#data_exploration)
+- [Design decisions](#design_decisions)
+- [What we learned](#what_we_learned)
+- [Bonus](#bonus)
+- [Usage reference](#usage_reference)
+- [Development](#development)
+- [Resources](#resources)
+- [License](#license)
+
 ## Quick start
 Requirements: Python ≥ 3.11 and [uv](https://docs.astral.sh/uv/).
 
@@ -460,14 +472,14 @@ What we would add next: a CI that runs mypy and the tests on every push. For now
 
 ## Bonus
 
-- [x] More fields for `describe`
-- [x] Answer mathematically: which Hogwarts course has a homogeneous score distribution between all four houses?
-- [x] Answer mathematically: what are the two features that are similar?
-- [x] Stochastic gradient descent
-- [x] Mini-batch gradient descent
-- [x] Softmax
-- [x] Early stopping
-- [x] Cost plot
+- More fields for `describe`
+- Answer mathematically: which Hogwarts course has a homogeneous score distribution between all four houses?
+- Answer mathematically: what are the two features that are similar?
+- Stochastic gradient descent
+- Mini-batch gradient descent
+- Softmax
+- Early stopping
+- Cost plot
 
 ## Usage reference
 
