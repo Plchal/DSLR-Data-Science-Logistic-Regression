@@ -41,11 +41,11 @@ uv sync
 ```
 
 ```bash
-uv run src/logreg_train.py -f dataset_train.csv
+uv run src/logreg_train.py dataset_train.csv
 ```
 
 ```bash
-uv run src/logreg_predict.py -f dataset_test.csv
+uv run src/logreg_predict.py dataset_test.csv
 ```
 
 The predictions are written to `houses.csv`.
@@ -542,7 +542,7 @@ uv run src/logreg_train.py dataset_train.csv --softmax
 | `-d`, `--display` | off | Plot the loss evolution |
 
 ```bash
-uv run src/logreg_train.py -f dataset_train.csv --features "Astronomy,Herbology,Charms"
+uv run src/logreg_train.py dataset_train.csv --features "Astronomy,Herbology,Charms"
 ```
 
 The selected features are stored in the weights file, so the prediction automatically uses the same ones.
