@@ -91,12 +91,12 @@ def main() -> int:
     if df is None:
         return 1
 
-    parser = argparse.ArgumentParser(description="A program that displays one or more scatter plot.")
-    parser.add_argument("-s1", "--subject1", type=str, help="Select the first subject you want to compare.")
-    parser.add_argument("-s2", "--subject2", type=str, help="Select the second subject you want to compare.")
+    parser = argparse.ArgumentParser(description="A program that displays one or more scatter plot")
+    parser.add_argument("-s1", "--subject1", type=str, help="Select the first subject you want to compare")
+    parser.add_argument("-s2", "--subject2", type=str, help="Select the second subject you want to compare")
 
-    parser.add_argument("-a", "--auto", action="store_true", help="Show the two subject with the most similarity.")
-    parser.add_argument("-f", "--full", action="store_true", help="Show all combination of subject compare.")
+    parser.add_argument("-a", "--auto", action="store_true", help="Show the two subject with the most similarity")
+    parser.add_argument("-f", "--full", action="store_true", help="Show all combination of subject compare")
     args = parser.parse_args()
 
     if args.full:

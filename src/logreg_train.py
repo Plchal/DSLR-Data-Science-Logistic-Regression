@@ -89,13 +89,22 @@ def _pars_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="A script that creates the .csv file containing the parameters of our logistic regression."
     )
-    parser.add_argument("-f", "--file", type=str, help="Path to the CSV file used to train the model")
+    parser.add_argument("file", type=str, help="Path to the CSV file used to train the model")
     parser.add_argument("--softmax", action="store_true", help="Train one softmax classifier instead of one-vs-all")
-    parser.add_argument("--features", type=str, default=None, help="Comma-separated list of features to train on")
+    parser.add_argument(
+        "--features",
+        type=str,
+        default=None,
+        help="Comma-separated list of features to train on (default: best features)",
+    )
     parser.add_argument("--optimizer", choices=list(get_args(Optimizer)), default="batch")
-    parser.add_argument("--alpha", type=float, default=0.1)
-    parser.add_argument("--iteration", type=int, default=10000)
-    parser.add_argument("--batch_size", type=int, default=DEFAULT_BATCH_SIZE)
+    parser.add_argument("--alpha", type=float, default=0.1, help="Learning rate (default: 0.1)")
+    parser.add_argument(
+        "--iteration", type=int, default=10000, help="Maximum number of passes over the dataset (default: 10000)"
+    )
+    parser.add_argument(
+        "--batch_size", type=int, default=DEFAULT_BATCH_SIZE, help="Batch size used if the optimizer is minibatch"
+    )
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--output", type=str, default=None, help="Output file (default depends on the model)")
     parser.add_argument("-d", "--display", action="store_true", help="Display loss evolution")

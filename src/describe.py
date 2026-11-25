@@ -10,7 +10,7 @@ from utils import load_csv
 def main() -> int:
     """Display informations for all numerical features if valid file is given."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("file", help="Path of the file")
+    parser.add_argument("file", help="Path of the train dataset")
     args = parser.parse_args()
     data_frame = load_csv(args.file)
     if data_frame is None:
