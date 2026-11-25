@@ -32,13 +32,13 @@ uv run src/scikitlearn_compare.py
 ```
 
 ## Contents
-- [Quick start](#quick_start)
-- [How it works](#how_it_works)
-- [Data exploration](#data_exploration)
-- [Design decisions](#design_decisions)
-- [What we learned](#what_we_learned)
+- [Quick start](#quick-start)
+- [How it works](#how-it-works)
+- [Data exploration](#data-exploration)
+- [Design decisions](#design-decisions)
+- [What we learned](#what-we-learned)
 - [Bonus](#bonus)
-- [Usage reference](#usage_reference)
+- [Usage reference](#usage-reference)
 - [Development](#development)
 - [Resources](#resources)
 - [License](#license)
@@ -109,18 +109,12 @@ We select the features whose scatter plots split the students into four distinct
 
 ## Design decisions
 
-<!-- Ce qu'un lead technique cherche : tu as choisi, tu sais ce que tu as écarté et pourquoi.
-     Garde 4 à 6 lignes. Amorces ci-dessous, à remplir ou à remplacer. Une ligne honnête
-     (« choix par défaut, je le referais autrement ») vaut mieux qu'une justification inventée. -->
+When choosing the model, we implemented the Strategy pattern in order to:
+- have a single object that can use both algorithms independently.
+- isolate the implementation details of the algorithms from the code that uses them.
+- replace inheritance with composition.
+- adhere to the Open/Closed Principle. This makes it possible to introduce new strategies without having to modify the context.
 
-| Decision | Alternative considered | Why |
-| -------- | ---------------------- | --- |
-| One `LogisticRegression` class taking a binary or multinomial model | TODO | TODO |
-| One-vs-all and softmax both available | TODO | TODO |
-| Mean and standard deviation stored in the weights file | TODO | TODO |
-| Missing values: rows dropped for training, mean-imputed for prediction | TODO | TODO |
-| Early stopping on the loss | TODO | TODO |
-| 4 features by default instead of all 13 | TODO | TODO |
 
 ## What we learned
 
