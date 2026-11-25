@@ -525,13 +525,12 @@ uv run src/pair_plot.py
 Train the one-vs-all classifiers (default) or a single softmax classifier:
 
 ```bash
-uv run src/logreg_train.py -f dataset_train.csv
-uv run src/logreg_train.py -f dataset_train.csv --softmax
+uv run src/logreg_train.py dataset_train.csv
+uv run src/logreg_train.py dataset_train.csv --softmax
 ```
 
 | Option | Default | Effect |
 | ------ | ------- | ------ |
-| `-f`, `--file` | `dataset_train.csv` | Training dataset |
 | `--softmax` | off | Train one softmax classifier instead of one-vs-all |
 | `--features` | `Astronomy,Herbology,Defense Against the Dark Arts,Ancient Runes` | Comma-separated list of columns to train on |
 | `--optimizer` | `none` | `none`, `batch`, `sgd` or `minibatch`. The stochastic variants trade a smooth convergence for faster iterations on large datasets |
@@ -556,11 +555,11 @@ The selected features are stored in the weights file, so the prediction automati
 Predict with the one-vs-all weights (default) or with the softmax weights:
 
 ```bash
-uv run src/logreg_predict.py -f dataset_test.csv
-uv run src/logreg_predict.py -f dataset_test.csv --softmax
+uv run src/logreg_predict.py dataset_test.csv
+uv run src/logreg_predict.py dataset_test.csv --softmax
 ```
 
-The weights are read from `weights.csv` (or `weights_softmax.csv`) in the current directory. The predictions are
+The weights are read from `weights.csv` (or `weights_softmax.csv`) in the current directory, or to `--weight <file>`. The predictions are
 written to `houses.csv`, or to `--output <file>`.
 
 </details>
@@ -600,6 +599,8 @@ The tests (in the `tests/` directory) cover 5 areas:
 ### With Nix
 
 [Nix](https://nixos.org/) is a package manager that provides a reproducible, declarative development environment.
+
+You can use Nix if you don't want to install Python directly. Please note that you won't be able to run the data visualization tools with Nix (Python is required in this case). 
 
 Shell with the runtime tools (Python, uv):
 ```bash
